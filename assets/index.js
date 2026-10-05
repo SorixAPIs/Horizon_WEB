@@ -89,10 +89,11 @@ const state = {
   roblox: 'Checking...',
   robloxChecked: false,
   robloxLoading: false,
-  /* online: null = still checking, true/false = last known state */
+  /* online: null = still checking, true/false = last known state.
+     `latest` and `supported` are the two hashes the status is derived from. */
   builds: {
-    internal: { online: null, version: '', checked: false, error: null },
-    external: { online: null, version: '', checked: false, error: null }
+    internal: { online: null, latest: '', supported: '', checked: false, error: null },
+    external: { online: null, latest: '', supported: '', checked: false, error: null }
   }
 };
 
@@ -115,25 +116,43 @@ function escapeHtml(value) {
 
 /* ---------------------------------------------------------------------------
    Live build status
+   -------------------------------------------------------------------------
+   A build is UP when it still supports the newest release:
+
+       latest      newest version that exists
+       supported   newest version this build actually handles
+
+   Equal -> ONLINE, different -> OFFLINE. Both hashes are printed on the card
+   so the pill can be checked by eye instead of taken on trust. A payload that
+   cannot answer that question falls back to plain reachability (the endpoint
+   answered, so the build is being served) - unless it carries an explicit
+   `status` flag, which outranks the guess.
    ------------------------------------------------------------------------- */
 
-/* A successful response means the endpoint is serving that build. If the API
-   ever grows an explicit flag (`status`, or a boolean `supported`) that wins
-   over the reachability guess. */
-function deriveBuildStatus(data, reachable) {
-  if (!reachable) return false;
+const STATUS_ON  = ['online', 'up', 'available', 'ready', 'live', 'true', '1'];
+const STATUS_OFF = ['offline', 'down', 'unavailable', 'coming soon', 'in dev', 'false', '0'];
 
-  if (data && typeof data.status === 'string') {
+function deriveBuildStatus(data, reachable) {
+  /* Nothing to judge on */
+  if (!reachable || !data) return false;
+
+  /* An explicit flag, if the API ever grows one, wins outright */
+  if (typeof data.status === 'string') {
     const s = data.status.trim().toLowerCase();
-    if (['online', 'up', 'available', 'ready', 'live', 'true', '1'].includes(s)) return true;
-    if (['offline', 'down', 'unavailable', 'coming soon', 'in dev', 'false', '0'].includes(s)) {
-      return false;
-    }
+    if (STATUS_ON.includes(s)) return true;
+    if (STATUS_OFF.includes(s)) return false;
   }
 
-  if (data && typeof data.supported === 'boolean') return data.supported;
+  /* The rule: latest must match supported */
+  if (typeof data.latest === 'string' && typeof data.supported === 'string') {
+    if (!data.latest && !data.supported) return true;   // empty payload: no signal
+    return data.latest === data.supported;
+  }
 
-  return true;
+  /* Older shape: `supported` as a boolean */
+  if (typeof data.supported === 'boolean') return data.supported;
+
+  return true;   // reachable and nothing to compare
 }
 
 function buildPill(build) {
@@ -141,11 +160,20 @@ function buildPill(build) {
   return statusPill(build.online, build.online ? 'ONLINE' : 'OFFLINE');
 }
 
-function buildVersionText(build) {
-  if (build.version) return build.version;
-  if (build.online === null) return 'Checking...';
-  if (build.error) return 'Unavailable';
-  return 'Unknown';
+function buildVersions(build) {
+  if (build.online === null) {
+    return '<div class="build-versions"><div class="build-line">' +
+           '<strong>checking…</strong></div></div>';
+  }
+
+  const row = (label, value) =>
+    '<div class="build-line"><span>' + label + '</span>' +
+      '<strong>' + escapeHtml(value || '—') + '</strong></div>';
+
+  return '<div class="build-versions">' +
+           row('latest', build.latest) +
+           row('supported', build.supported) +
+         '</div>';
 }
 
 function buildCard(opts) {
@@ -155,8 +183,7 @@ function buildCard(opts) {
       '<div class="status-card-head"><span>' + opts.title + '</span>' +
         icon(opts.iconName, 17) + '</div>' +
       buildPill(build) +
-      '<div class="build-version"><strong>' +
-        escapeHtml(buildVersionText(build)) + '</strong></div>' +
+      buildVersions(build) +
       '<p>' + escapeHtml(build.error || opts.copy) + '</p>' +
     '</article>'
   );
@@ -174,7 +201,8 @@ function applyBuild(key, snapshot) {
 
   if (reachable) {
     const data = snapshot.data || {};
-    build.version = data.latest || data.version || build.version;
+    if (typeof data.latest === 'string') build.latest = data.latest;
+    if (typeof data.supported === 'string') build.supported = data.supported;
   }
 
   if (state.page === 'status') render();

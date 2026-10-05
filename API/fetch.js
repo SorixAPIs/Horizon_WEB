@@ -63,7 +63,27 @@
     return JSON.parse(payload.trim());
   }
 
+  /* Same-origin passthrough. The browser fetches this from its own origin, so
+     it needs no CORS header and is not blocked as mixed content even though
+     the upstream is http:// only. Only works when the host proxies it - see
+     `_redirects` and the README. Unconfigured it just 404s and loses the race,
+     which is why it costs nothing to keep it first. */
+  var PROXY_PREFIX = '/horizon-upstream/';
+
+  /* http://host:port/path  ->  /path */
+  function stripOrigin(url) {
+    var i = url.indexOf('://');
+    var rest = i >= 0 ? url.slice(i + 3) : url;
+    var slash = rest.indexOf('/');
+    return slash < 0 ? '/' : rest.slice(slash);
+  }
+
   var GATES = [
+    {
+      id: 'site-proxy',
+      build: function (u) { return PROXY_PREFIX + stripOrigin(u); },
+      parse: raw
+    },
     {
       id: 'direct',
       build: function (u) { return u; },
@@ -102,6 +122,15 @@
   var activeGate = null;
 
   /* ---- primitives -------------------------------------------------------- */
+
+  /* Which transport to try next when nothing has won yet. Shared by every
+     poller so two endpoints don't hammer the same relay in lockstep. */
+  var rotationCursor = 0;
+  function nextGate() {
+    var gate = GATES[rotationCursor % GATES.length];
+    rotationCursor += 1;
+    return gate;
+  }
 
   function request(url) {
     var options = { cache: 'no-store' };
@@ -196,6 +225,7 @@
     var busy = false;
     var timer = null;
     var onVisible = null;
+    var attemptNo = 0;
 
     /** One cycle. Resolves with the snapshot either way. */
     function fetchNow() {
@@ -210,11 +240,25 @@
 
       busy = true;
       last.attemptAt = Date.now();
+      attemptNo += 1;
 
-      /* Known-good transport first; if it fails, race everything. */
-      var chain = activeGate
-        ? raceGates([activeGate], url).catch(function () { return raceGates(GATES, url); })
-        : raceGates(GATES, url);
+      var chain;
+      if (activeGate) {
+        /* A transport already proved itself: use it, and only re-race the full
+           list if it suddenly stops working (rare, so the burst is fine). */
+        chain = raceGates([activeGate], url).catch(function () {
+          return raceGates(GATES, url);
+        });
+      } else if (attemptNo === 1) {
+        /* First cycle: race everything so a working transport is found in one
+           shot instead of a round-robin at a time. */
+        chain = raceGates(GATES, url);
+      } else {
+        /* Nothing has won yet. Re-racing all five every 10 seconds only earns
+           rate-limit bans (429/403) from the relays, so probe one per cycle
+           and rotate through them instead. */
+        chain = raceGates([nextGate()], url);
+      }
 
       return withDeadline(chain, HARD_DEADLINE).then(
         function (result) {

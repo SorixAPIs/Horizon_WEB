@@ -5,8 +5,11 @@
 .brand:hover .brand-mark img{opacity:.9}
 .og-preview{display:none}
 
-/* Live build version shown under the status pill */
-.build-version { display: block; margin-top: 16px; }
+/* Live latest/supported hashes shown under the status pill */
+.build-versions{margin-top:15px;display:grid;gap:5px}
+.build-line{display:flex;align-items:baseline;gap:9px}
+.build-line span{flex:0 0 auto;font-size:9px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:#5f6067}
+.build-line strong{min-width:0;word-break:break-all;font:600 11px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d0d0d4}
 
 /* Download unavailable (missing build file on the host) */
 .download-error{color:#b9b9c0;font-weight:600}

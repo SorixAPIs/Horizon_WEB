@@ -66,8 +66,20 @@ The old flat endpoint (`.../api/fetch`) no longer exists upstream, so there is n
 
 The **Internal Executor** and **External** cards poll their endpoints every 10 s and show:
 
-- pill: **ONLINE** / **OFFLINE** / **CHECKING…** — derived from reachability, unless the payload carries an explicit `status` string or boolean `supported`
-- build hash: the `latest` field from the payload
+- pill: **ONLINE** / **OFFLINE** / **CHECKING…** — derived by comparing the two hashes in the payload:
+
+  | `latest` | `supported` | result |
+  | --- | --- | --- |
+  | `version-abc` | `version-abc` | **ONLINE** — the build still handles the newest release |
+  | `version-abc` | `version-xyz` (or `""`) | **OFFLINE** — build hasn't caught up |
+  | — | — | **OFFLINE** if the endpoint can't be reached at all |
+
+  An explicit `status` string in the payload outranks the comparison, and an
+  empty payload (`latest` *and* `supported` both `""`) is treated as "no
+  signal" rather than a failure.
+
+- **`latest` and `supported` are both printed** on the card, so the pill can be
+  checked by eye instead of taken on trust.
 
 Both pollers stop while you are off the Status page.
 

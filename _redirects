@@ -1,0 +1,11 @@
+# Proxy the Horizon API through this site.
+#
+# The browser then fetches from its own origin, which means:
+#   - no CORS header needed on the upstream
+#   - not blocked as mixed content, even though the upstream is http:// only
+#   - no third-party relay involved at all
+#
+# If you deploy somewhere that does not understand this file (GitHub Pages,
+# Cloudflare Pages), the site simply falls back to its relay chain - see README.
+
+/horizon-upstream/*  http://paloma.hidencloud.com:24617/:splat  200
