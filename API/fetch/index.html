@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex,nofollow">
+    <title>Horizon — /API/fetch</title>
+    <link rel="icon" type="image/png" href="../../assets/horizonnn.png">
+    <style>
+        /* Mimic a raw application/json response: plain monospace text, nothing else. */
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #ffffff;
+            color: #000000;
+        }
+        pre {
+            margin: 0;
+            padding: 0;
+            font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+    </style>
+</head>
+<body>
+    <pre id="out">{}</pre>
+
+    <script src="../fetch.js"></script>
+    <script>
+        (function () {
+            'use strict';
+
+            var out = document.getElementById('out');
+
+            if (!window.HorizonAPI) {
+                out.textContent = JSON.stringify({ error: 'API/fetch.js failed to load' });
+                return;
+            }
+
+            var ENDPOINTS = window.HorizonAPI.ENDPOINTS;
+            var names = Object.keys(ENDPOINTS);
+            var pollers = {};
+
+            names.forEach(function (name) {
+                pollers[name] = window.HorizonAPI.createPoller(ENDPOINTS[name]);
+            });
+
+            /* Snapshot of one endpoint: the live payload when we have it, a
+               plain error object while it is unreachable, nothing guessed. */
+            function bodyFor(name) {
+                var snap = pollers[name].last;
+                if (snap.data !== null) return snap.data;
+                if (snap.error) return { error: snap.error };
+                return { status: 'waiting for the first response' };
+            }
+
+            function paint() {
+                var doc = {};
+                names.forEach(function (name) { doc[name] = bodyFor(name); });
+                out.textContent = JSON.stringify(doc);
+            }
+
+            /* Transports are raced only until one wins, and that winner is
+               remembered for every later request. Start the first endpoint,
+               then the rest once it reports back - so the second one does not
+               re-race every transport from scratch. */
+            function startAll() {
+                var first = names[0];
+                var primed = false;
+
+                pollers[first].start(function () {
+                    paint();
+                    if (primed) return;
+                    primed = true;
+                    names.slice(1).forEach(function (name) {
+                        pollers[name].start(paint);
+                    });
+                });
+            }
+
+            paint();
+            startAll();
+        })();
+    </script>
+</body>
+</html>

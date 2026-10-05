@@ -1,0 +1,26 @@
+{
+  "Horizon": {
+    "Status": "In Dev",
+    "Version": "0.0.0",
+    "type": "external",
+    "loaderVersion": "v0.0.0",
+    "clientVersion": "v0.0.0-ptb",
+    "Discord_Invite": "https://discord.gg/beM4pRtBdG",
+    "Changelogs": [
+      "Nothing"
+    ],
+    "supportedRobloxBuild": {
+      "hash": "4310300497aa4917",
+      "version": "version-4310300497aa4917",
+      "channel": "LIVE"
+    },
+
+
+    "Download_Options": {
+      "Download_1": {
+        "Title": "Work.ink",
+        "Download_Link": "https://work.ink/None"
+      }
+    }
+  }
+}

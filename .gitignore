@@ -1,0 +1,27 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Node (no build step here, but harmless if a tool is ever run)
+node_modules/
+package-lock.json
+
+# Local environment
+.env
+.env.*
+
+# Legacy Venus logo. Superseded by assets/horizonnn.png (remote original:
+# http://paloma.hidencloud.com:24617/cdn/horizonnn.png). Kept on disk,
+# deliberately never published.
+Logo.png

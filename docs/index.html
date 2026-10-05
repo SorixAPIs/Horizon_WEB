@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex,nofollow,noarchive">
+<script>
+/* This page is hidden. It bounces normal visitors back to the site root.
+   To open it yourself, add ?key=horizon to the URL once - the choice sticks
+   for the current tab. */
+(function () {
+    try {
+        if (new URLSearchParams(location.search).get('key') === 'horizon') {
+            sessionStorage.setItem('horizon-allow', '1');
+            return;
+        }
+        if (sessionStorage.getItem('horizon-allow') === '1') return;
+    } catch (e) { /* storage blocked: fail closed and bounce */ }
+    location.replace('../');
+})();
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horizon - Documentation</title>
+    <link rel="icon" type="image/png" href="/assets/horizonnn.png">
+    <meta name="description" content="Horizon API Documentation">
+    <meta name="theme-color" content="#4e9af5">
+    <style>
+        :root {
+            --bg: #0c0e13;
+            --surface: #141720;
+            --surface-hover: #1a1e2b;
+            --border: #1f2435;
+            --text: #d8dce6;
+            --muted: #5c6478;
+            --accent: #4e9af5;
+            --accent-dim: rgba(78, 154, 245, 0.1);
+            --code-bg: #0d1117;
+            --green: #34d399;
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .wrap {
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        nav {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        nav .wrap {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+            transition: opacity 0.2s var(--ease-out);
+        }
+
+        .brand:hover { opacity: 0.8; }
+
+        .brand img { width: 28px; height: 28px; }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            padding: 6px 14px;
+            font-size: 13px;
+            color: var(--muted);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.2s var(--ease-out);
+            white-space: nowrap;
+        }
+
+        .nav-link:hover {
+            color: var(--text);
+            background: var(--surface);
+        }
+
+        .nav-link.active {
+            color: var(--text);
+            background: var(--surface);
+        }
+
+        .docs-content {
+            padding: 60px 0;
+        }
+
+        .docs-header {
+            margin-bottom: 40px;
+        }
+
+        .docs-header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+
+        .docs-header p {
+            color: var(--muted);
+            font-size: 16px;
+            max-width: 600px;
+        }
+
+        .docs-section {
+            margin-bottom: 48px;
+        }
+
+        .docs-section h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .docs-section h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--accent);
+            margin: 24px 0 12px;
+        }
+
+        .docs-section p {
+            color: var(--text);
+            margin-bottom: 16px;
+            line-height: 1.7;
+        }
+
+        .endpoint-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin: 16px 0;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            position: relative;
+        }
+
+        .endpoint-method {
+            display: inline-block;
+            background: var(--accent);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .endpoint-url {
+            font-family: 'Courier New', monospace;
+            color: var(--accent);
+            font-size: 14px;
+            word-break: break-all;
+            flex: 1;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s var(--ease-out);
+            opacity: 0;
+        }
+
+        .endpoint-box .copy-btn {
+            position: relative;
+            top: auto;
+            right: auto;
+            opacity: 1;
+            flex-shrink: 0;
+        }
+
+        .code-block:hover .copy-btn, .response-example:hover .copy-btn, .endpoint-box .copy-btn:hover {
+            opacity: 1;
+        }
+
+        .copy-btn:hover {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .copy-btn.copied {
+            background: var(--green);
+            color: #fff;
+            border-color: var(--green);
+        }
+
+        .code-block, .response-example {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .response-example {
+            background: var(--surface);
+        }
+
+        .code-block pre, .response-example pre {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #e6edf3;
+            padding-right: 60px;
+            white-space: pre;
+        }
+
+        .response-example pre {
+            color: #a5d6ff;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 16px 0;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            min-width: 600px;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--surface);
+            font-weight: 600;
+            color: #fff;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            color: var(--text);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: var(--surface);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .badge-string { background: rgba(136, 23, 113, 0.2); color: #d8b4fe; }
+        .badge-integer { background: rgba(23, 113, 100, 0.2); color: #6ee7b7; }
+        .badge-object { background: rgba(78, 154, 245, 0.2); color: #93c5fd; }
+        .badge-array { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+
+        footer {
+            margin-top: 80px;
+            padding: 24px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        @media (max-width: 640px) {
+            .wrap { padding: 0 16px; }
+            .docs-content { padding: 40px 0; }
+            .docs-header h1 { font-size: 28px; }
+            .docs-header p { font-size: 15px; }
+            .docs-section h2 { font-size: 20px; }
+            .docs-section h3 { font-size: 16px; }
+            .endpoint-box { padding: 12px 16px; }
+            .code-block pre, .response-example pre { font-size: 12px; padding-right: 0; }
+            .copy-btn { opacity: 1; position: relative; top: auto; right: auto; margin-top: 8px; display: block; width: 100%; text-align: center; }
+            .endpoint-box .copy-btn { width: auto; margin-top: 0; }
+            table { font-size: 13px; }
+            th, td { padding: 10px 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="wrap">
+        <a href="index.html" class="brand">
+            <img src="/assets/horizonnn.png" alt="Horizon" onerror="this.style.display='none'">
+            Horizon
+        </a>
+        <div class="nav-links">
+            <a href="../home" class="nav-link">Home</a>
+            <a href="../docs" class="nav-link">API Docs</a>
+            <a href="https://discord.gg/beM4pRtBdG" target="_blank" class="nav-link">Discord</a>
+        </div>
+    </div>
+</nav>
+
+<div class="wrap">
+    <div class="docs-content">
+        <div class="docs-header">
+            <h1>API Documentation</h1>
+            <p>The public Horizon API is unauthenticated and rate-limited per IP. All responses are JSON. The base URL is <code style="background: var(--surface); padding: 2px 6px; border-radius: 4px; color: var(--accent);">/</code></p>
+        </div>
+
+        <div class="docs-section">
+            <h2>On this page</h2>
+            <ul style="list-style: none; color: var(--muted);">
+                <li style="padding: 4px 0;"><a href="#endpoint" style="color: var(--accent); text-decoration: none;">GET /API/endpoint.json</a></li>
+            </ul>
+        </div>
+
+        <div class="docs-section" id="endpoint">
+            <h2>GET /API/endpoint.json</h2>
+            <p>Returns the current status, version, and configuration of Horizon.</p>
+
+            <div class="endpoint-box">
+                <span class="endpoint-method">GET</span>
+                <span class="endpoint-url" id="endpoint-url-text">/API/endpoint.json</span>
+                <button class="copy-btn" data-target="endpoint-url-text">Copy URL</button>
+            </div>
+
+            <h3>Example Request</h3>
+            <div class="code-block">
+                <button class="copy-btn" type="button">Copy</button>
+                <pre><code>const res = await fetch("/API/endpoint.json", {
+  headers: { Accept: "application/json" },
+});
+const data = await res.json();
+console.log(data);</code></pre>
+            </div>
+
+            <h3>Response</h3>
+            <div class="response-example">
+                <button class="copy-btn" type="button">Copy</button>
+                <pre><code>{
+  "Horizon": {
+    "Status": "In Dev",
+    "Version": "0.0.0",
+    "type": "external",
+    "UNC": 99,
+    "sUNC": 100,
+    "Raknet": true,
+    "Multi_Instance": true,
+    "Decompiler": true,
+    "loaderVersion": "v0.0.0",
+    "clientVersion": "v0.0.0-ptb",
+    "Discord_Invite": "https://discord.gg/beM4pRtBdG",
+    "Changelogs": [
+      "Nothing"
+    ],
+    "supportedRobloxBuild": {
+      "hash": "ddf602d9cfe44005",
+      "version": "version-ddf602d9cfe44005",
+      "channel": "LIVE"
+    },
+    "Download_Options": {
+      "Download_1": {
+        "Title": "Work.ink",
+        "Download_Link": "https://work.ink/None"
+      }
+    }
+  }
+}</code></pre>
+            </div>
+
+            <h3>Response Fields</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Status</td>
+                            <td><span class="badge badge-string">string</span></td>
+                            <td>Current operational status (In Dev, Operational, Down, Maintenance, Testing, Updating)</td>
+                        </tr>
+                        <tr>
+                            <td>Version</td>
+                            <td><span class="badge badge-string">string</span></td>
+                            <td>Semantic version, e.g. 0.0.0</td>
+                        </tr>
+                        <tr>
+                            <td>UNC</td>
+                            <td><span class="badge badge-integer">integer</span></td>
+                            <td>UNC compatibility score (0-100)</td>
+                        </tr>
+                        <tr>
+                            <td>sUNC</td>
+                            <td><span class="badge badge-integer">integer</span></td>
+                            <td>sUNC compatibility score (0-100)</td>
+                        </tr>
+                        <tr>
+                            <td>Raknet</td>
+                            <td><span class="badge badge-string">boolean</span></td>
+                            <td>Whether RakNet support is enabled</td>
+                        </tr>
+                        <tr>
+                            <td>Multi_Instance</td>
+                            <td><span class="badge badge-string">boolean</span></td>
+                            <td>Whether multi-instance is supported</td>
+                        </tr>
+                        <tr>
+                            <td>Decompiler</td>
+                            <td><span class="badge badge-string">boolean</span></td>
+                            <td>Whether decompiler is enabled</td>
+                        </tr>
+                        <tr>
+                            <td>loaderVersion</td>
+                            <td><span class="badge badge-string">string</span></td>
+                            <td>Current loader version</td>
+                        </tr>
+                        <tr>
+                            <td>clientVersion</td>
+                            <td><span class="badge badge-string">string</span></td>
+                            <td>Current client version</td>
+                        </tr>
+                        <tr>
+                            <td>Discord_Invite</td>
+                            <td><span class="badge badge-string">string</span></td>
+                            <td>Discord server invite link</td>
+                        </tr>
+                        <tr>
+                            <td>Changelogs</td>
+                            <td><span class="badge badge-array">array</span></td>
+                            <td>Array of recent changelog entries</td>
+                        </tr>
+                        <tr>
+                            <td>supportedRobloxBuild</td>
+                            <td><span class="badge badge-object">object</span></td>
+                            <td>Supported Roblox build information</td>
+                        </tr>
+                        <tr>
+                            <td>Download_Options</td>
+                            <td><span class="badge badge-object">object</span></td>
+                            <td>Available download mirrors and links</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Status Values</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge" style="background: rgba(52, 211, 153, 0.2); color: #6ee7b7;">Operational</span></td>
+                            <td>All systems functioning normally</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge" style="background: rgba(251, 191, 36, 0.2); color: #fcd34d;">In Dev</span></td>
+                            <td>Currently in development, may be unstable</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge" style="background: rgba(251, 146, 60, 0.2); color: #fdba74;">Maintenance</span></td>
+                            <td>Undergoing scheduled maintenance</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge" style="background: rgba(96, 165, 250, 0.2); color: #93c5fd;">Testing</span></td>
+                            <td>Currently being tested</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge" style="background: rgba(167, 139, 250, 0.2); color: #c4b5fd;">Updating</span></td>
+                            <td>Receiving updates</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge" style="background: rgba(248, 113, 113, 0.2); color: #fca5a5;">Down</span></td>
+                            <td>Service is currently unavailable</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="docs-section">
+            <h2>Need Help?</h2>
+            <p>Need an endpoint that is not listed here? Open an issue on Discord.</p>
+            <a href="https://discord.gg/beM4pRtBdG" target="_blank" class="nav-link" style="display: inline-block; margin-top: 8px;">Join our Discord</a>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="wrap">Horizon 2026 V1 &middot; All rights reserved</div>
+</footer>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            let textToCopy = '';
+            
+            if (btn.dataset.target) {
+                textToCopy = document.getElementById(btn.dataset.target).innerText;
+            } else {
+                const codeBlock = btn.parentElement.querySelector('code');
+                if (codeBlock) {
+                    textToCopy = codeBlock.innerText;
+                }
+            }
+
+            if (textToCopy) {
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    const originalText = btn.innerText;
+                    btn.innerText = 'Copied!';
+                    btn.classList.add('copied');
+                    setTimeout(() => {
+                        btn.innerText = originalText;
+                        btn.classList.remove('copied');
+                    }, 2000);
+                });
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

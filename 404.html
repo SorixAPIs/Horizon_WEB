@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#030304">
+    <meta name="robots" content="noindex,nofollow">
+
+    <title>Horizon — 404, page not found</title>
+
+    <!-- Absolute paths on purpose: this file is served for ANY unknown URL
+         (/anything/at/all), so relative asset links would break on deep paths. -->
+    <link rel="icon" type="image/png" href="/assets/horizonnn.png">
+    <link rel="apple-touch-icon" href="/assets/horizonnn.png">
+    <link rel="stylesheet" href="/assets/index.css">
+
+    <style>
+        /* Fallback so the page still reads correctly if /assets/index.css
+           ever fails to load. Values mirror the real stylesheet. */
+        html, body { margin: 0; background: #030304; color: #f7f7f8; }
+        body { font-family: Inter, system-ui, sans-serif; }
+
+        /* 404-specific tweaks */
+        .coming-page { text-align: center; min-height: 560px; }
+        .coming-icon { margin: 0 auto 25px; }
+        .coming-icon svg { width: 26px; height: 26px; }
+
+        a { text-decoration: none; color: inherit; }
+        .brand { display: flex; align-items: center; gap: 11px; }
+        .nav-ghost { display: inline-flex; align-items: center; }
+
+        .err-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 34px;
+        }
+
+        .err-path {
+            font: 600 11px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            color: #85858d;
+            word-break: break-all;
+        }
+
+        footer span { line-height: 1.6; }
+    </style>
+</head>
+
+<body oncontextmenu="return false">
+    <div class="page">
+        <nav class="nav">
+            <a class="brand" href="/">
+                <span class="brand-mark">
+                    <img src="http://paloma.hidencloud.com:24617/cdn/horizonnn.png" alt=""
+                         onerror="this.onerror=null;this.src='/assets/horizonnn.png'">
+                </span>
+                <span>HORIZON</span>
+            </a>
+            <a class="nav-ghost" href="/">Back to Horizon</a>
+        </nav>
+
+        <section class="coming-page">
+            <div class="coming-icon">
+                <!-- lucide: search-x -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
+                     stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                    <path d="m9 9 6 6"></path>
+                    <path d="m15 9-6 6"></path>
+                </svg>
+            </div>
+
+            <div class="page-kicker">ERROR 404</div>
+
+            <h1>Lost the thread.</h1>
+
+            <p>That page doesn&rsquo;t exist &mdash; it may have been moved, renamed, or the
+               link you followed is broken. Nothing is wrong with Horizon itself.</p>
+
+            <div class="err-actions">
+                <a class="btn btn-primary" href="/">Back to Horizon</a>
+                <a class="btn btn-secondary" href="/#status">Check system status</a>
+            </div>
+
+            <span class="coming-badge err-path" id="path" hidden></span>
+        </section>
+
+        <footer>
+            <span>Horizon &mdash; your scripts, your space.</span>
+            <span>404 &middot; not found</span>
+        </footer>
+    </div>
+
+    <script>
+        /* Show which URL missed, so broken links are easy to spot.
+           Hidden by default so the page is complete without JavaScript. */
+        (function () {
+            var el = document.getElementById('path');
+            if (!el) return;
+            el.textContent = document.location.pathname;
+            el.hidden = false;
+        })();
+    </script>
+</body>
+</html>

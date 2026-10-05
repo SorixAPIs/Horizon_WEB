@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex,nofollow,noarchive">
+<script>
+/* This page is hidden. It bounces normal visitors back to the site root.
+   To open it yourself, add ?key=horizon to the URL once - the choice sticks
+   for the current tab. */
+(function () {
+    try {
+        if (new URLSearchParams(location.search).get('key') === 'horizon') {
+            sessionStorage.setItem('horizon-allow', '1');
+            return;
+        }
+        if (sessionStorage.getItem('horizon-allow') === '1') return;
+    } catch (e) { /* storage blocked: fail closed and bounce */ }
+    location.replace('../');
+})();
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horizon</title>
+    <link rel="icon" type="image/png" href="/assets/horizonnn.png">
+    <meta name="description" content="A powerful external for Roblox with fly, aimbot, and more.">
+    <meta name="theme-color" content="#4e9af5">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Horizon">
+    <meta property="og:description" content="A powerful external for Roblox with fly, aimbot, and more.">
+    <meta property="og:image" content="/assets/horizonnn.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="Horizon">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="//">
+    <meta property="twitter:title" content="Horizon">
+    <meta property="twitter:description" content="A powerful external for Roblox with fly, aimbot, and more.">
+    <meta property="twitter:image" content="/assets/horizonnn.png">
+    <style>
+        :root {
+            --bg: #0c0e13;
+            --surface: #141720;
+            --surface-hover: #1a1e2b;
+            --border: #1f2435;
+            --text: #d8dce6;
+            --muted: #5c6478;
+            --accent: #4e9af5;
+            --accent-dim: rgba(78, 154, 245, 0.1);
+            --green: #34d399;
+            --red: #f87171;
+            --orange: #fb923c;
+            --yellow: #fbbf24;
+            --blue: #60a5fa;
+            --purple: #a78bfa;
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        .wrap {
+            max-width: 860px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(0.95); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .anim-in {
+            opacity: 0;
+            animation: fadeInUp 0.8s var(--ease-out) forwards;
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+
+        nav {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            animation: slideInLeft 0.6s var(--ease-out);
+        }
+
+        nav .wrap {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+            transition: all 0.3s var(--ease-out);
+        }
+
+        .brand:hover { 
+            opacity: 0.8;
+            transform: translateX(-2px);
+        }
+
+        .brand img {
+            width: 28px;
+            height: 28px;
+            animation: float 6s ease-in-out infinite;
+            transition: transform 0.3s var(--ease-out);
+        }
+
+        .brand:hover img {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link {
+            padding: 6px 14px;
+            font-size: 13px;
+            color: var(--muted);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s var(--ease-out);
+        }
+
+        .nav-link:hover {
+            color: var(--text);
+            background: var(--surface);
+            transform: translateY(-2px);
+        }
+
+        .hero {
+            padding: 100px 0 60px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 44px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 14px;
+            color: #fff;
+            animation: fadeInScale 0.8s var(--ease-out) 0.2s both;
+        }
+
+        .hero p {
+            color: var(--muted);
+            font-size: 16px;
+            max-width: 480px;
+            margin: 0 auto 32px;
+            animation: fadeInUp 0.8s var(--ease-out) 0.3s both;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--muted);
+            transition: all 0.3s var(--ease-out);
+            animation: fadeInUp 0.8s var(--ease-out) 0.4s both;
+        }
+
+        .badge:hover { 
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(78, 154, 245, 0.2);
+        }
+
+        .badge-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: pulse 2s infinite var(--ease-in-out);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 28px;
+            animation: fadeInUp 0.8s var(--ease-out) 0.5s both;
+        }
+
+        .dropdown-wrap {
+            position: relative;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 22px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+            text-decoration: none;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            transition: all 0.3s var(--ease-out);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn:hover {
+            background: var(--surface-hover);
+            border-color: #2a3045;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        .btn:active { transform: translateY(0) scale(0.98); }
+
+        .btn-fill {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .btn-fill::before {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .btn-fill:hover {
+            opacity: 0.9;
+            background: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(78, 154, 245, 0.3);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-8px);
+            width: 180px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 4px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s var(--ease-out);
+            z-index: 200;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+        }
+
+        .dropdown-wrap.open .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            font-size: 13px;
+            color: var(--text);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.2s var(--ease-out);
+        }
+
+        .dropdown-item:hover { 
+            background: var(--surface-hover);
+            transform: translateX(4px);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 60px;
+            animation: fadeInScale 0.8s var(--ease-out) 0.6s both;
+        }
+
+        .stat {
+            background: var(--surface);
+            padding: 24px 16px;
+            text-align: center;
+            transition: all 0.3s var(--ease-out);
+        }
+
+        .stat:hover { 
+            background: var(--surface-hover);
+            transform: translateY(-4px);
+        }
+
+        .stat-num {
+            font-size: 26px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+            transition: all 0.3s var(--ease-out);
+        }
+
+        .stat:hover .stat-num {
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        .stat-lbl {
+            font-size: 12px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 60px;
+        }
+
+        .feat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 24px;
+            transition: all 0.4s var(--ease-out);
+            animation: fadeInUp 0.8s var(--ease-out) both;
+        }
+
+        .feat:nth-child(1) { animation-delay: 0.7s; }
+        .feat:nth-child(2) { animation-delay: 0.8s; }
+        .feat:nth-child(3) { animation-delay: 0.9s; }
+
+        .feat:hover {
+            border-color: var(--accent);
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 12px 32px rgba(78, 154, 245, 0.15);
+        }
+
+        .feat h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .feat p {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .info-wrap { position: relative; }
+
+        .info-panel {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 260px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            z-index: 200;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px) scale(0.95);
+            transition: all 0.3s var(--ease-out);
+        }
+
+        .info-panel.open { 
+            opacity: 1; 
+            visibility: visible; 
+            transform: translateY(0) scale(1);
+        }
+
+        .info-panel h4 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--muted);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .irow {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .irow:hover {
+            transform: translateX(4px);
+        }
+
+        .irow span:first-child { color: var(--muted); }
+        .irow span:last-child { color: var(--text); font-weight: 500; }
+
+        .ichanges {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+        }
+
+        .ichanges h4 {
+            margin-bottom: 8px;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .ichange {
+            font-size: 12px;
+            color: var(--muted);
+            padding: 4px 0 4px 10px;
+            border-left: 2px solid var(--accent);
+            margin-bottom: 6px;
+            transition: all 0.2s var(--ease-out);
+            animation: slideInLeft 0.4s var(--ease-out) both;
+        }
+
+        .ichange:nth-child(2) { animation-delay: 0.1s; }
+        .ichange:nth-child(3) { animation-delay: 0.2s; }
+        .ichange:nth-child(4) { animation-delay: 0.3s; }
+
+        .ichange:hover {
+            border-left-color: var(--accent);
+            background: var(--accent-dim);
+            padding-left: 14px;
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 24px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            font-size: 12px;
+            color: var(--muted);
+            animation: fadeInUp 0.8s var(--ease-out) 1s both;
+        }
+
+        @media (max-width: 640px) {
+            .hero h1 { font-size: 30px; }
+            .stats, .features { grid-template-columns: 1fr; }
+            .btn-row { flex-direction: column; align-items: center; }
+            .dropdown-menu { left: 0; transform: translateY(-8px); width: 100%; }
+            .dropdown-wrap.open .dropdown-menu { transform: translateY(0); }
+            .info-panel { right: -50px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="wrap">
+        <a href="#" class="brand">
+            <img src="/assets/horizonnn.png" alt="Horizon" onerror="this.style.display='none'">
+            Horizon
+        </a>
+        <div class="nav-links">
+            <a href="../docs" class="nav-link">API Docs</a>
+            <a href="//tos" class="nav-link">Terms</a>
+            <a href="#" class="nav-link" id="discord-link">Discord</a>
+            <div class="info-wrap">
+                <a href="#" class="nav-link" id="infoBtn">Status</a>
+                <div class="info-panel" id="infoPanel">
+                    <h4>Build Info</h4>
+                    <div class="irow"><span>Version</span><span id="ep-version">--</span></div>
+                    <div class="irow"><span>UNC</span><span id="ep-unc">--%</span></div>
+                    <div class="irow"><span>sUNC</span><span id="ep-sunc">--%</span></div>
+                    <div class="irow"><span>RakNet</span><span id="ep-raknet">--</span></div>
+                    <div class="irow"><span>Multi Instance</span><span id="ep-multi">--</span></div>
+                    <div class="irow"><span>Decompiler</span><span id="ep-decomp">--</span></div>
+                    <div class="ichanges">
+                        <h4>Changelog</h4>
+                        <div id="ep-changelog"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="wrap">
+    <section class="hero">
+        <h1>Horizon</h1>
+        <p>A powerful external for Roblox with many Features.</p>
+        <div class="badge">
+            <span class="badge-dot" id="main-status-dot"></span>
+            <span id="main-status-text">Loading...</span>
+        </div>
+        <div class="btn-row">
+            <div class="dropdown-wrap" id="download-wrap">
+                <button class="btn btn-fill" id="download-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Download
+                </button>
+                <div class="dropdown-menu" id="download-menu">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-num" id="member-count">--</div>
+            <div class="stat-lbl">Active Users</div>
+        </div>
+        <div class="stat">
+            <div class="stat-num">99.9%</div>
+            <div class="stat-lbl">Uptime</div>
+        </div>
+        <div class="stat">
+            <div class="stat-num" id="status-label">--</div>
+            <div class="stat-lbl">Status</div>
+        </div>
+    </div>
+
+    <div class="features">
+        <div class="feat">
+            <h3>Fast Updates</h3>
+            <p>Quick Update times.</p>
+        </div>
+        <div class="feat">
+            <h3>External Build</h3>
+            <p>Prioritizes stability.</p>
+        </div>
+        <div class="feat">
+            <h3>Experienced Dev</h3>
+            <p>Built by a developer with a history of successful projects.</p>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="wrap">Horizon 2026 V1 &middot; All rights reserved</div>
+</footer>
+
+<script>
+    function fmt(n) {
+        if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+        if (n >= 1e3) return (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
+        return String(n);
+    }
+
+    function animateValue(element, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            const easeProgress = 1 - Math.pow(1 - progress, 3);
+            const current = Math.floor(easeProgress * (end - start) + start);
+            element.textContent = fmt(current) + '+';
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            }
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    async function loadMembers() {
+        try {
+            const r = await fetch('https://discord.com/api/guilds/1538645400402264205/widget.json');
+            if (!r.ok) throw 0;
+            const d = await r.json();
+            const memberCount = d.members ? d.members.length : 1000;
+            const countElement = document.getElementById('member-count');
+            animateValue(countElement, 0, memberCount, 1500);
+        } catch {
+            document.getElementById('member-count').textContent = '1K+';
+        }
+    }
+
+    async function loadEndpoint() {
+        try {
+            const r = await fetch('/API/endpoint.json');
+            if (!r.ok) throw 0;
+            const d = await r.json();
+            const v = d["Horizon"];
+            if (!v) throw 0;
+
+            document.getElementById('main-status-text').textContent = v.Status;
+            document.getElementById('status-label').textContent = v.Status;
+            document.getElementById('ep-version').textContent = v.Version;
+            document.getElementById('ep-unc').textContent = v.UNC + '%';
+            document.getElementById('ep-sunc').textContent = v.sUNC + '%';
+            document.getElementById('ep-raknet').textContent = v.Raknet ? 'Yes' : 'No';
+            document.getElementById('ep-multi').textContent = v.Multi_Instance ? 'Yes' : 'No';
+            document.getElementById('ep-decomp').textContent = v.Decompiler ? 'Yes' : 'No';
+
+            if (v.Discord_Invite) {
+                document.getElementById('discord-link').href = v.Discord_Invite;
+            }
+
+            const menu = document.getElementById('download-menu');
+            menu.innerHTML = '';
+            
+            if (v.Download_Options && typeof v.Download_Options === 'object') {
+                Object.entries(v.Download_Options).forEach(([key, opt], index) => {
+                    const a = document.createElement('a');
+                    a.href = opt.Download_Link;
+                    a.className = 'dropdown-item';
+                    a.target = '_blank';
+                    a.style.animationDelay = `${index * 0.05}s`;
+                    a.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg><span>${opt.Title}</span>`;
+                    menu.appendChild(a);
+                });
+            }
+
+            const cl = document.getElementById('ep-changelog');
+            cl.innerHTML = '';
+            if (Array.isArray(v.Changelogs) && v.Changelogs.length) {
+                v.Changelogs.forEach((c, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'ichange';
+                    div.style.animationDelay = `${index * 0.1}s`;
+                    div.textContent = c;
+                    cl.appendChild(div);
+                });
+            } else {
+                const div = document.createElement('div');
+                div.className = 'ichange';
+                div.textContent = 'No changes yet';
+                cl.appendChild(div);
+            }
+
+            let dc = '#5c6478';
+            if (v.Status === 'Operational') dc = '#34d399';
+            else if (v.Status === 'Down') dc = '#f87171';
+            else if (v.Status === 'Maintenance') dc = '#fbbf24';
+            else if (v.Status === 'Testing') dc = '#a78bfa';
+            else if (v.Status === 'Updating') dc = '#60a5fa';
+            else if (v.Status === 'In Dev') dc = '#fb923c';
+
+            document.getElementById('main-status-dot').style.background = dc;
+        } catch {
+            document.getElementById('main-status-text').textContent = 'Unknown';
+        }
+    }
+
+    document.getElementById('infoBtn').addEventListener('click', e => {
+        e.preventDefault();
+        document.getElementById('infoPanel').classList.toggle('open');
+    });
+
+    document.getElementById('download-btn').addEventListener('click', e => {
+        e.preventDefault();
+        document.getElementById('download-wrap').classList.toggle('open');
+    });
+
+    document.addEventListener('click', e => {
+        const infoWrap = document.querySelector('.info-wrap');
+        if (!infoWrap.contains(e.target)) {
+            document.getElementById('infoPanel').classList.remove('open');
+        }
+        
+        const downloadWrap = document.getElementById('download-wrap');
+        if (!downloadWrap.contains(e.target)) {
+            downloadWrap.classList.remove('open');
+        }
+    });
+
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animationPlayState = 'running';
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.feat, .stat').forEach(el => {
+        el.style.animationPlayState = 'paused';
+        observer.observe(el);
+    });
+
+    loadMembers();
+    loadEndpoint();
+    setInterval(loadEndpoint, 30000);
+</script>
+
+</body>
+</html>
