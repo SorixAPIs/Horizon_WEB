@@ -134,6 +134,12 @@ The live site is **[gethorizon.kdns.fr](https://gethorizon.kdns.fr/)** (Vercel).
 
 On a host with neither (GitHub Pages, Cloudflare Pages), there is no same-origin passthrough and the Status page must fall back to a public relay. The alternative everywhere is to serve the API over `https://`, which would make the `direct` transport usable and both config files redundant.
 
+### Asset caching
+
+The host serves `assets/*` and `API/*` with `Cache-Control: public, max-age=14400` (a 4-hour browser cache — Cloudflare's default Browser Cache TTL). `vercel.json` overrides it to `max-age=0, must-revalidate` so an ordinary push goes live immediately.
+
+Where that override does not apply, bump the `?v=20261007-1` query string on the `<script>`/`<link>` tags in `index.html`, `API/fetch.html` and `API/fetch/index.html`. A new query string is a new cache entry, so it bypasses whatever the browser is still holding. Change `20261007-1` to any new token — the value is only ever compared for inequality.
+
 ## Notes
 
 - The site blocks right-click, text selection and devtools shortcuts as a soft deterrent. That is not real protection — anything shipped to a browser can be read.

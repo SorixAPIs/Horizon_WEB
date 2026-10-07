@@ -4,5 +4,19 @@
       "source": "/horizon-upstream/:path*",
       "destination": "http://paloma.hidencloud.com:24617/:path*"
     }
+  ],
+  "headers": [
+    {
+      "source": "/assets/:file*",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/API/:file*",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+      ]
+    }
   ]
 }
