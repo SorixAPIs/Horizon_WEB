@@ -1,6 +1,6 @@
 # Horizon
 
-Source for **[horizonlol.netlify.app](https://horizonlol.netlify.app/)** — the public site for Horizon, a keyless Roblox executor.
+Source for **[gethorizon.kdns.fr](https://gethorizon.kdns.fr/)** — the public site for Horizon, a keyless Roblox executor.
 
 Static site. No build step, no framework, no server runtime — open `index.html` or point any static host at the repo root.
 
@@ -52,15 +52,23 @@ The old flat endpoint (`.../api/fetch`) no longer exists upstream, so there is n
 
 **Why a poller at all?** The host is static, so no server process can serve live JSON. Instead `API/fetch.js` keeps a 10-second poll running in the browser and the page renders the current snapshot.
 
-**Why the transport chain?** Two things block a plain `fetch()`:
+**Why the transport chain?** The upstream now sends
+`Access-Control-Allow-Origin: *`, so CORS is no longer the problem — but it is
+still `http://` only, and **mixed content** means any `https://` page refuses
+to `fetch()` it no matter what headers it carries.
 
-1. **CORS** — the upstream sends no `Access-Control-Allow-Origin`.
-2. **Mixed content** — the upstream is `http://` only, which any `https://` page blocks.
+`API/fetch.js` therefore tries its transports in order of cleanliness and keeps
+the first that returns parseable JSON:
 
-`API/fetch.js` therefore races several transports (`direct`, `allorigins`, `codetabs`, `corsproxy`, `jina`) and keeps the first that returns parseable JSON; the winner is remembered for every later request.
+| transport | when it applies |
+| --- | --- |
+| `direct` | `http://` pages only — skipped on `https://`, where it is guaranteed to be blocked |
+| `site-proxy` | `/horizon-upstream/*`, a same-origin passthrough (needs the host's rewrite config below) |
+| `allorigins`, `codetabs`, `corsproxy`, `jina` | last resort — public CORS relays, rate-limited and brittle |
 
-> Recommended fix on the upstream server, which would make all of that unnecessary:
-> `res.set('Access-Control-Allow-Origin', '*');` — plus serving it over the same scheme as the site.
+The clean transport gets a solo attempt first, so a working setup logs **zero**
+console errors; the others are only raced if it fails. Once a transport wins it
+is remembered for every later request.
 
 ## Status page
 
@@ -115,7 +123,16 @@ Then open `http://localhost:3000` (or `:8000`).
 
 ## Deployment
 
-Any static host works. For the custom 404, the host must look for `404.html` at the site root (Netlify, GitHub Pages and Cloudflare Pages all do).
+Any static host works. For the custom 404, the host must look for `404.html` at the site root (Netlify, GitHub Pages, Vercel and Cloudflare Pages all do).
+
+The live site is **[gethorizon.kdns.fr](https://gethorizon.kdns.fr/)** (Vercel). Two config files are shipped so the `/horizon-upstream/` passthrough works on either major host — **both are required for the site to reach the API from `https://`**, since mixed content blocks a direct call:
+
+| host | file | effect |
+| --- | --- | --- |
+| Vercel | `vercel.json` | rewrites `/horizon-upstream/:path*` → `http://paloma.hidencloud.com:24617/:path*` |
+| Netlify | `_redirects` | same rewrite, Netlify syntax |
+
+On a host with neither (GitHub Pages, Cloudflare Pages), there is no same-origin passthrough and the Status page must fall back to a public relay. The alternative everywhere is to serve the API over `https://`, which would make the `direct` transport usable and both config files redundant.
 
 ## Notes
 

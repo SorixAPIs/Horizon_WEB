@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/horizon-upstream/:path*",
+      "destination": "http://paloma.hidencloud.com:24617/:path*"
+    }
+  ]
+}
