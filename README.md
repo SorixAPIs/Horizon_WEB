@@ -136,9 +136,16 @@ On a host with neither (GitHub Pages, Cloudflare Pages), there is no same-origin
 
 ### Asset caching
 
-The host serves `assets/*` and `API/*` with `Cache-Control: public, max-age=14400` (a 4-hour browser cache — Cloudflare's default Browser Cache TTL). `vercel.json` overrides it to `max-age=0, must-revalidate` so an ordinary push goes live immediately.
+Measured on the live host:
 
-Where that override does not apply, bump the `?v=20261007-1` query string on the `<script>`/`<link>` tags in `index.html`, `API/fetch.html` and `API/fetch/index.html`. A new query string is a new cache entry, so it bypasses whatever the browser is still holding. Change `20261007-1` to any new token — the value is only ever compared for inequality.
+| file | `Cache-Control` sent to the browser |
+| --- | --- |
+| `/`, `/404.html` (HTML) | `public, max-age=0, must-revalidate` |
+| `/assets/*.js`, `/assets/*.css`, `/API/*.js` | `public, max-age=14400, must-revalidate` |
+
+The difference is Cloudflare, not this repo: Cloudflare caches `.js`/`.css` and then stamps its own **Browser Cache TTL** (default 4 hours) onto the response, while HTML passes through with the origin's value. `vercel.json` sets the origin side to `max-age=0, must-revalidate`, which is the correct declaration and takes effect as soon as the zone's Browser Cache TTL is set to *Respect Origin* — but with the default it never reaches the browser.
+
+**So a push to JS/CSS can stay invisible for up to four hours.** The reliable bypass is the `?v=` query string on the `<script>`/`<link>` tags in `index.html`, `API/fetch.html` and `API/fetch/index.html`: a new query string is a new cache entry, so it ignores whatever the browser is still holding. Change `20261007-1` to any new token — the value is only ever compared for inequality. Bump it whenever `assets/*.js`, `assets/*.css` or `API/fetch.js` change and the change matters right away.
 
 ## Notes
 
