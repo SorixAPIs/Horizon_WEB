@@ -121,13 +121,50 @@
      upstream will work for the others too, so we remember it globally. */
   var activeGate = null;
 
+  /* ---- transport selection ---------------------------------------------- */
+
+  function gateById(id) {
+    for (var i = 0; i < GATES.length; i++) {
+      if (GATES[i].id === id) return GATES[i];
+    }
+    return null;
+  }
+
+  /* The upstream is http:// only, so a page served over https:// can never
+     fetch it directly - the browser blocks it as mixed content before the
+     request leaves, and writes a console error for free. Don't spend a
+     request on a transport that is guaranteed to be refused. */
+  function directUsable() {
+    if (typeof location === 'undefined') return true;   // not running in a browser
+    if (location.protocol !== 'https:') return true;    // no mixed content risk
+    return /^https:/.test(API_BASE);                    // upstream has TLS
+  }
+
+  function usableGates() {
+    return GATES.filter(function (g) {
+      return g.id !== 'direct' || directUsable();
+    });
+  }
+
+  /* Cleanest transport first: the direct request (no third party, and CORS
+     now permits it), then the same-origin passthrough, then the relays. */
+  function preferredGate() {
+    return gateById(directUsable() ? 'direct' : 'site-proxy');
+  }
+
+  function otherGates() {
+    var preferred = preferredGate();
+    return usableGates().filter(function (g) { return g !== preferred; });
+  }
+
   /* ---- primitives -------------------------------------------------------- */
 
   /* Which transport to try next when nothing has won yet. Shared by every
      poller so two endpoints don't hammer the same relay in lockstep. */
   var rotationCursor = 0;
   function nextGate() {
-    var gate = GATES[rotationCursor % GATES.length];
+    var pool = usableGates();
+    var gate = pool[rotationCursor % pool.length];
     rotationCursor += 1;
     return gate;
   }
@@ -244,19 +281,23 @@
 
       var chain;
       if (activeGate) {
-        /* A transport already proved itself: use it, and only re-race the full
-           list if it suddenly stops working (rare, so the burst is fine). */
+        /* A transport already proved itself: use it, and only re-race the
+           usable list if it suddenly stops working. */
         chain = raceGates([activeGate], url).catch(function () {
-          return raceGates(GATES, url);
+          return raceGates(usableGates(), url);
         });
       } else if (attemptNo === 1) {
-        /* First cycle: race everything so a working transport is found in one
-           shot instead of a round-robin at a time. */
-        chain = raceGates(GATES, url);
+        /* First cycle: give the clean transport a solo shot before falling
+           back to a full race. Racing everything up front is no faster - the
+           race resolves the moment the first one wins - but it does leave
+           console errors from every transport we did not end up needing. */
+        chain = raceGates([preferredGate()], url).catch(function () {
+          return raceGates(otherGates(), url);
+        });
       } else {
-        /* Nothing has won yet. Re-racing all five every 10 seconds only earns
-           rate-limit bans (429/403) from the relays, so probe one per cycle
-           and rotate through them instead. */
+        /* Nothing has won yet. Re-racing all of them every 10 seconds only
+           earns rate-limit bans (429/403) from the relays, so probe one per
+           cycle and rotate through them instead. */
         chain = raceGates([nextGate()], url);
       }
 
