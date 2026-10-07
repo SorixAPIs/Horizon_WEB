@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex,nofollow">
     <title>Horizon — /API/fetch</title>
-    <link rel="icon" type="image/png" href="../assets/horizonnn.png">
+    <link rel="icon" type="image/png" href="/assets/horizonnn.png">
     <style>
         /* Mimic a raw application/json response: plain monospace text, nothing else. */
         html, body {
@@ -26,7 +26,9 @@
 <body>
     <pre id="out">{}</pre>
 
-    <script src="./fetch.js?v=20261007-1"></script>
+    <!-- Root-relative: see API/fetch/index.html for why ../ and ./ are wrong
+         when the same document is reached as /API/fetch and as /API/fetch/. -->
+    <script src="/API/fetch.js?v=20261007-1"></script>
     <script>
         (function () {
             'use strict';
