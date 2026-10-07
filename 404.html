@@ -52,8 +52,11 @@
         <nav class="nav">
             <a class="brand" href="/">
                 <span class="brand-mark">
-                    <img src="http://paloma.hidencloud.com:24617/cdn/horizonnn.png" alt=""
-                         onerror="this.onerror=null;this.src='/assets/horizonnn.png'">
+                    <!-- The bundled copy is byte-identical to the CDN original
+                         (verified by SHA-256), so the error page renders from
+                         disk alone: no http:// request that an https:// host
+                         would reject as mixed content before falling back. -->
+                    <img src="/assets/horizonnn.png" alt="">
                 </span>
                 <span>HORIZON</span>
             </a>
