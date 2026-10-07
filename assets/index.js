@@ -74,6 +74,15 @@ const BUILD_ENDPOINTS = {
 /* Remote logo first (as configured), bundled copy as an automatic fallback so
    the mark still renders on hosts that serve the page over HTTPS. */
 function logoImg() {
+  /* An https:// page cannot load an http:// image: Chrome silently rewrites it
+     to https:// and that request dies, buying a mixed-content warning plus a
+     console error for a picture that never renders. The bundled copy is
+     byte-identical to the CDN original, so go straight to it when the remote
+     one cannot possibly load. */
+  const remoteUsable = location.protocol !== 'https:' || /^https:/.test(LOGO_REMOTE);
+
+  if (!remoteUsable) return '<img src="' + LOGO_LOCAL + '" alt="">';
+
   return '<img src="' + LOGO_REMOTE + '" alt="" ' +
          'onerror="this.onerror=null;this.src=\'' + LOGO_LOCAL + '\'">';
 }
