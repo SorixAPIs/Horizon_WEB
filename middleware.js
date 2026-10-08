@@ -20,10 +20,12 @@
 import { randomBytes } from 'node:crypto';
 
 const GIST_ID   = '2b8d1771bd120bed768c14ae8b2431a1';
-const WORK_INK  = 'https://work.ink/_api/v2/token/isValid/';
 
 const LETTERS    = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 const KEY_LENGTH = 19; // same shape as HSIHHIzihekjkhijhgf
+
+/* A Horizon key is good for 24h from the moment it was issued. */
+const KEY_TTL_SECONDS = 24 * 60 * 60;
 
 export const config = {
   runtime: 'nodejs',
@@ -66,16 +68,37 @@ function randomString(n, alphabet) {
   return out;
 }
 
-/* consume=true appends ?deleteToken=1, which makes the token one-shot. */
+/* consume=true appends ?deleteToken=1, which makes the token one-shot.
+ *
+ * With WORKINK_API_KEY set this uses the authenticated endpoint, which is the
+ * whole reason to prefer it: it answers 403 for a token minted by somebody
+ * else's work.ink account. Without it an attacker could satisfy this check
+ * with a token from their own link and never run our checkpoints at all.
+ *
+ * 401 -> our own credential is wrong (configuration, not the visitor).
+ * 403 -> credential is fine, token is foreign -> treat as not valid.
+ */
 async function workInkValid(token, consume) {
-  const url = WORK_INK + encodeURIComponent(token) + (consume ? '?deleteToken=1' : '');
-  const res = await fetch(url, {
-    headers: { Accept: 'application/json' },
-    redirect: 'manual'
-  });
+  const apiKey = process.env.WORKINK_API_KEY;
+  const endpoint = apiKey ? 'token/verify/' : 'token/isValid/';
+  const url = 'https://work.ink/_api/v2/' + endpoint + encodeURIComponent(token) +
+              (consume ? '?deleteToken=1' : '');
+
+  const headers = { Accept: 'application/json' };
+  if (apiKey) headers['X-Api-Key'] = apiKey;
+
+  const res = await fetch(url, { headers: headers, redirect: 'manual' });
+
+  if (res.status === 401) {
+    const err = new Error('work.ink rejected WORKINK_API_KEY (401)');
+    err.code = 'WORKINK_MISCONFIGURED';
+    throw err;
+  }
+  if (res.status === 403) return false;
   if (!res.ok) throw new Error('work.ink answered ' + res.status);
-  const json = await res.json();
-  return json && json.valid === true;
+
+  const data = await res.json();
+  return data && data.valid === true;
 }
 
 function gistHeaders() {
@@ -164,19 +187,28 @@ function renderHtml(result) {
   /* A storage failure has no key and no count - never print "undefined". */
   const headline = ok
     ? 'This key exists and was issued by the Horizon key system.'
-    : (result.error || 'This key is not in the issued list. Keys are only handed out after both checkpoints.');
+    : (result.error || result.message ||
+       'This key is not in the issued list. Keys are only handed out after both checkpoints.');
 
-  const heading = ok ? 'Valid' : (result.error ? 'Unavailable' : 'Not valid');
+  const heading = ok
+    ? 'Valid'
+    : (result.error ? 'Unavailable' : (result.expired ? 'Expired' : 'Not valid'));
 
-  const when = ok && result.generatedAt
+  const when = result.generatedAt
     ? 'Issued ' + Math.max(0, Math.round(result.ageSeconds / 60)) + ' minute(s) ago. '
+    : '';
+
+  const left = ok && result.expiresInSeconds > 0
+    ? Math.round(result.expiresInSeconds / 60) + ' minute(s) left of 1440. '
     : '';
 
   const keyLine = result.key
     ? '<p><code>' + esc(result.key) + '</code></p>'
     : '';
 
-  const counts = issued > 0 ? when + issued + ' key(s) issued in total.' : when.trim();
+  const counts = issued > 0
+    ? when + left + issued + ' key(s) issued in total.'
+    : (when + left).trim();
 
   return '<!DOCTYPE html>\n<html lang="en"><head><meta charset="UTF-8">' +
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
@@ -248,6 +280,12 @@ async function handleIssue(request) {
     return json(200, { key: key });
   } catch (err) {
     console.error('[horizon] issue failed:', err && err.message);
+
+    /* 401 from work.ink means our own credential is wrong. This fires on the
+       first, non-destructive check, so no checkpoint token has been spent. */
+    if (err && err.code === 'WORKINK_MISCONFIGURED') {
+      return json(503, { error: 'key verification is misconfigured' });
+    }
     return json(502, { error: 'verification failed' });
   }
 }
@@ -281,11 +319,22 @@ async function handleVerify(request, url) {
     const found = lookup(gist.content, key);
 
     const now = Math.floor(Date.now() / 1000);
+    const stamp = found.hit && found.hit.stamp ? found.hit.stamp : null;
+    const age = stamp ? now - stamp : null;
+
+    /* Issued, but older than a day: still a known key, just no longer good. */
+    const expired = !!stamp && age > KEY_TTL_SECONDS;
+
     const result = {
-      valid: !!found.hit,
+      valid: !!stamp && !expired,
       key: key,
-      generatedAt: found.hit && found.hit.stamp ? found.hit.stamp : null,
-      ageSeconds: found.hit && found.hit.stamp ? now - found.hit.stamp : null,
+      expired: expired,
+      message: expired
+        ? 'This key expired after 24 hours. Run both checkpoints again for a fresh one.'
+        : null,
+      generatedAt: stamp,
+      ageSeconds: age,
+      expiresInSeconds: stamp && !expired ? KEY_TTL_SECONDS - age : 0,
       issued: found.issued
     };
 

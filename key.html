@@ -142,7 +142,7 @@
         </div>
     </main>
 
-    <footer>Every key is issued once, then burned. Replaying a checkpoint token will not produce a second one.</footer>
+    <footer>Keys are good for 24 hours, and each one is issued from a single pair of checkpoints — replaying them will not produce a second.</footer>
 
     <script>
     (function () {
@@ -198,7 +198,15 @@
         }
 
         /* Non-destructive: only the server burns a token, and only when it is
-           actually about to hand a key out. */
+           actually about to hand a key out.
+ *
+           Deliberately the PUBLIC isValid endpoint. This runs in the visitor's
+           browser, so an API key here would be readable by anyone — the work.ink
+           docs are explicit that it must never live in browser JavaScript. That
+           makes this only a fast "keep going" signal. The authoritative check is
+           /api/key/issue, which switches to the authenticated endpoint (and
+           rejects tokens minted on someone else's account) once WORKINK_API_KEY
+           is set. */
         function tokenValid(token) {
             return fetch(WORK + '/_api/v2/token/isValid/' + encodeURIComponent(token), {
                 headers: { 'Accept': 'application/json' }
@@ -299,7 +307,7 @@
             el.lead.innerHTML = 'Both checkpoints verified. This key is bound to <b>Horizon External</b>.';
             el.keyval.textContent = key;
             el.keyblock.className = 'keyblock on';
-            el.note.innerHTML = 'Single-use. Check it any time at <code>/key/verify/key=' +
+            el.note.innerHTML = 'Valid for 24 hours. Check it any time at <code>/key/verify/key=' +
                                 key.replace(/[<>&]/g, '') + '</code>';
         }
 

@@ -96,10 +96,25 @@ Each redirect to work.ink carries a `{TOKEN}` placeholder in its destination,
 which work.ink fills in when it sends the visitor back. Only work.ink can
 produce one, so there is nothing to forge.
 
-`middleware.js` validates **both** tokens server-side against
-`work.ink/_api/v2/token/isValid`, then burns them with `?deleteToken=1` so the
-same pair can never mint a second key. None of that check lives in page
-JavaScript, so editing `key.html` buys nothing.
+`middleware.js` validates **both** tokens server-side against work.ink, then
+burns them with `?deleteToken=1` so the same pair can never mint a second key.
+None of that check lives in page JavaScript, so editing `key.html` buys nothing.
+
+Which work.ink endpoint answers depends on whether `WORKINK_API_KEY` is set:
+
+| Env | Endpoint | Token from another work.ink account |
+| --- | --- | --- |
+| unset | `_api/v2/token/isValid/{TOKEN}` | **accepted** — the hole below is open |
+| set | `_api/v2/token/verify/{TOKEN}` + `X-Api-Key` | **403**, rejected |
+
+That second row is the point. The public `isValid` endpoint *"answers anyone
+who holds a key"*, so without `WORKINK_API_KEY` an attacker can mint a token
+from **their own** work.ink link, hand both to `/api/key/issue`, and be issued
+a key without ever touching Checkpoint 1 or 2. The authenticated endpoint
+rejects any token not created for one of your links, which is what makes the
+flow actually closed. `401` (our credential wrong) is reported as
+`503 key verification is misconfigured` and fires before anything is spent;
+`403` is simply `valid: false`.
 
 What is *not* protected: step order and one-time use are enforced with
 `sessionStorage`, which can be cleared. That only earns a restart — fresh
@@ -109,6 +124,33 @@ Each step URL is spent once. Revisiting a used one redirects to a path that is
 deliberately never rewritten, so the host returns a real `404`. `/get_key/v=1`
 keeps working until a key has actually been issued.
 
+### Key lifetime — 24 hours
+
+Keys are stored as `<key> <unix seconds>`, so `/key/verify` knows how old each
+one is. A key is good for **86 400 seconds (24 h)** from the moment it was
+issued:
+
+- within the window → `{"valid": true, "expiresInSeconds": …}`
+- older than that → `{"valid": false, "expired": true}` — still shown as
+  *issued*, but no longer accepted, with the HTML page heading **Expired**
+  instead of **Not valid**.
+
+`KEY_TTL_SECONDS` in `middleware.js` is the single place that changes it.
+
+Two clocks, deliberately separate:
+
+| Clock | Where it lives | What it does |
+| --- | --- | --- |
+| Horizon key | the gist + `KEY_TTL_SECONDS` | how long the key the visitor keeps stays usable |
+| work.ink token | **Settings → Key Expiration Time (minutes)** | how long a checkpoint proof survives before `middleware.js` rejects it |
+
+The second one matters more than it looks: `/api/key/issue` re-validates
+Checkpoint 1's token only *after* Checkpoint 2 is done, so the setting has to
+cover the whole run. At the default **5 minutes** a visitor who watches an ad
+for six loses both checkpoints. **Set it to `1440`** (24 h) in the work.ink
+dashboard — tokens are burned with `deleteToken=1` on issue, so a long window
+does not make them reusable.
+
 ### Setup
 
 The gist is **private**, so both endpoints need a token:
@@ -116,12 +158,16 @@ The gist is **private**, so both endpoints need a token:
 1. GitHub → Settings → Developer settings → Personal access tokens →
    **Tokens (classic)** → generate with the **`gist`** scope only.
    (Fine-grained tokens cannot reach gists.)
-2. Vercel → Project → Settings → Environment Variables → add `GIST_TOKEN` →
-   redeploy.
+2. Vercel → Project → Settings → Environment Variables → add `GIST_TOKEN`.
+3. work.ink → **API Keys** → Add key (the same key the Link API uses), then
+   add `WORKINK_API_KEY` in Vercel. Skip this only if you are happy leaving
+   the cross-account hole above open.
+4. Redeploy.
 
-Without it, issuing answers `503 key storage is not configured` *before* any
-checkpoint token is spent, so nobody loses progress. Issued keys are appended as
-`<key> <unix seconds>` beneath the existing `HORIZON-OWNER` line.
+Without `GIST_TOKEN`, issuing answers `503 key storage is not configured`
+*before* any checkpoint token is spent, so nobody loses progress. Issued keys
+are appended as `<key> <unix seconds>` beneath the existing `HORIZON-OWNER`
+line.
 
 ### Where it runs
 
