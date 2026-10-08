@@ -17,6 +17,8 @@
    The secret never reaches the browser, which is the whole point.
 --------------------------------------------------------------------------- */
 
+import { randomBytes } from 'node:crypto';
+
 const GIST_ID   = '2b8d1771bd120bed768c14ae8b2431a1';
 const WORK_INK  = 'https://work.ink/_api/v2/token/isValid/';
 
@@ -58,7 +60,7 @@ function preflight(methods) {
 }
 
 function randomString(n, alphabet) {
-  const bytes = require('crypto').randomBytes(n);
+  const bytes = randomBytes(n);
   let out = '';
   for (let i = 0; i < n; i++) out += alphabet.charAt(bytes[i] % alphabet.length);
   return out;
@@ -156,10 +158,25 @@ function esc(s) {
 }
 
 function renderHtml(result) {
-  const ok = result.valid;
+  const ok = !!result.valid;
+  const issued = typeof result.issued === 'number' ? result.issued : 0;
+
+  /* A storage failure has no key and no count - never print "undefined". */
+  const headline = ok
+    ? 'This key exists and was issued by the Horizon key system.'
+    : (result.error || 'This key is not in the issued list. Keys are only handed out after both checkpoints.');
+
+  const heading = ok ? 'Valid' : (result.error ? 'Unavailable' : 'Not valid');
+
   const when = ok && result.generatedAt
-    ? 'Issued ' + Math.max(0, Math.round(result.ageSeconds / 60)) + ' minute(s) ago.'
+    ? 'Issued ' + Math.max(0, Math.round(result.ageSeconds / 60)) + ' minute(s) ago. '
     : '';
+
+  const keyLine = result.key
+    ? '<p><code>' + esc(result.key) + '</code></p>'
+    : '';
+
+  const counts = issued > 0 ? when + issued + ' key(s) issued in total.' : when.trim();
 
   return '<!DOCTYPE html>\n<html lang="en"><head><meta charset="UTF-8">' +
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
@@ -181,16 +198,10 @@ function renderHtml(result) {
     'a{color:#a1a1aa}' +
     '</style></head><body><div class="c ' + (ok ? 'ok' : 'no') + '">' +
     '<div class="s">HORIZON KEY CHECK</div>' +
-    '<h1>' + (ok ? 'Valid' : 'Not valid') + '</h1>' +
-    '<p>' + (ok
-      ? 'This key exists and was issued by the Horizon key system.'
-      : 'This key is not in the issued list. Keys are only handed out after both checkpoints.') +
-    '</p>' +
-    '<p><code>' + esc(result.key) + '</code></p>' +
-    '<p class="n">' + esc(
-      when ? when + ' ' + result.issued + ' key(s) issued in total.'
-           : result.issued + ' key(s) issued in total.'
-    ) + '<br><a href="/">Back to Horizon</a></p>' +
+    '<h1>' + heading + '</h1>' +
+    '<p>' + esc(headline) + '</p>' +
+    keyLine +
+    '<p class="n">' + esc(counts) + (counts ? '<br>' : '') + '<a href="/">Back to Horizon</a></p>' +
     '</div></body></html>';
 }
 
