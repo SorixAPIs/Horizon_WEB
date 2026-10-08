@@ -9,3 +9,14 @@
 # Cloudflare Pages), the site simply falls back to its relay chain - see README.
 
 /horizon-upstream/*  http://paloma.hidencloud.com:24617/:splat  200
+
+# Key system: /get_key/v=1, /key/auth=<auth>/c1, /key/auth=<auth>/c2 and
+# /key/success=<token> are all served by the two pages below, which work out
+# which step they are from location.pathname.
+#
+# NOTE: /key/verify/key=<KEY> and /api/key/issue are answered by middleware.js
+# (Vercel Routing Middleware). A host that only reads this file cannot run it,
+# so those two will fall through to key.html and 404 - see README -> Key system.
+
+/key/*      /key.html      200
+/get_key/*  /get_key.html  200

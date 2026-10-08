@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#030304">
+    <meta name="robots" content="noindex,nofollow">
+
+    <title>Horizon — Key</title>
+
+    <!-- Absolute paths: served for every /key/* URL, including three levels deep. -->
+    <link rel="icon" type="image/png" href="/assets/horizonnn.png">
+    <link rel="apple-touch-icon" href="/assets/horizonnn.png">
+
+    <style>
+        /* Self-contained: correct even if /assets/index.css never loads. */
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { margin: 0; background: #030304; color: #f7f7f8; }
+        body {
+            min-height: 100vh;
+            font-family: Inter, system-ui, -apple-system, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            display: flex;
+            flex-direction: column;
+        }
+        a { color: inherit; text-decoration: none; }
+
+        .nav { display: flex; align-items: center; justify-content: space-between; padding: 22px 30px; }
+        .brand { display: flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: .04em; }
+        .brand-mark { display: inline-flex; width: 26px; height: 26px; }
+        .brand-mark img { width: 100%; height: 100%; object-fit: contain; }
+
+        main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 30px; }
+
+        .card {
+            width: 100%;
+            max-width: 480px;
+            background: #0a0a0c;
+            border: 1px solid #1c1c21;
+            border-radius: 16px;
+            padding: 38px 34px;
+            text-align: center;
+        }
+
+        .step {
+            font: 600 11px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            letter-spacing: .22em;
+            color: #85858d;
+            margin-bottom: 18px;
+        }
+        h1 { font-size: 30px; line-height: 1.15; margin: 0 0 12px; letter-spacing: -.02em; }
+        .lead { margin: 0 0 26px; color: #a1a1aa; font-size: 14.5px; line-height: 1.65; }
+        .lead b { color: #f7f7f8; font-weight: 600; }
+
+        .track { position: relative; height: 4px; border-radius: 99px; background: #1c1c21; overflow: hidden; margin-bottom: 22px; }
+        .track span {
+            position: absolute; inset: 0 auto 0 0; width: 38%; border-radius: 99px;
+            background: #f7f7f8; animation: slide 1.15s ease-in-out infinite;
+        }
+        .track.done span { width: 100%; animation: none; }
+        @keyframes slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(340%); } }
+
+        .status {
+            font: 600 12.5px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            color: #85858d; min-height: 18px; word-break: break-word;
+        }
+
+        .fail {
+            display: none; margin-top: 20px; padding: 14px;
+            border: 1px solid #4a1d22; background: #170b0d; border-radius: 10px;
+            color: #ff9ba3; font-size: 13.5px; line-height: 1.6; text-align: left;
+        }
+        .fail.on { display: block; }
+
+        /* --- issued key ------------------------------------------------- */
+        .keyblock { display: none; margin-top: 4px; }
+        .keyblock.on { display: block; }
+
+        .keylabel {
+            font: 600 11px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            letter-spacing: .2em; color: #85858d; margin-bottom: 12px;
+        }
+
+        .keyrow {
+            display: flex; gap: 8px; align-items: stretch;
+            background: #030304; border: 1px solid #1c1c21;
+            border-radius: 11px; padding: 8px 8px 8px 15px;
+        }
+        .keyval {
+            flex: 1; display: flex; align-items: center; justify-content: flex-start;
+            font: 700 17px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            letter-spacing: .1em; color: #f7f7f8; word-break: break-all; text-align: left;
+        }
+        .copy {
+            flex: none; padding: 0 18px; border: none; border-radius: 8px;
+            background: #f7f7f8; color: #030304;
+            font: 700 13.5px Inter, system-ui, sans-serif; cursor: pointer;
+            transition: background .15s ease;
+        }
+        .copy:hover { background: #d9d9de; }
+        .copy.done { background: #1f3d24; color: #7ee2a2; }
+
+        .note {
+            margin-top: 18px; font-size: 12.5px; line-height: 1.65; color: #85858d;
+        }
+        .note code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            color: #a1a1aa;
+        }
+
+        footer { padding: 22px 30px 30px; text-align: center; font-size: 12.5px; color: #85858d; }
+    </style>
+</head>
+
+<body oncontextmenu="return false">
+    <nav class="nav">
+        <a class="brand" href="/">
+            <span class="brand-mark"><img src="/assets/horizonnn.png" alt="Horizon"></span>
+            <span>HORIZON</span>
+        </a>
+    </nav>
+
+    <main>
+        <div class="card">
+            <div class="step" id="step">CHECKPOINT 2 OF 2</div>
+            <h1 id="title">Verifying</h1>
+            <p class="lead" id="lead">Checking that Checkpoint 1 really finished.</p>
+
+            <div class="track" id="track"><span></span></div>
+            <div class="status" id="status">Verifying…</div>
+
+            <div class="fail" id="fail"></div>
+
+            <div class="keyblock" id="keyblock">
+                <div class="keylabel">YOUR HORIZON KEY</div>
+                <div class="keyrow">
+                    <div class="keyval" id="keyval"></div>
+                    <button class="copy" id="copy" type="button">Copy</button>
+                </div>
+                <p class="note" id="note"></p>
+            </div>
+        </div>
+    </main>
+
+    <footer>Every key is issued once, then burned. Replaying a checkpoint token will not produce a second one.</footer>
+
+    <script>
+    (function () {
+        'use strict';
+
+        var STORE = 'horizon.keyflow';
+        var WORK  = 'https://work.ink';
+        var HC2   = WORK + '/3440/hc2';
+        var SITE  = location.origin;
+
+        var ALNUM   = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'; /* auth / success */
+        var LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';       /* the key itself */
+
+        var el = {
+            step:    document.getElementById('step'),
+            title:   document.getElementById('title'),
+            lead:    document.getElementById('lead'),
+            track:   document.getElementById('track'),
+            status:  document.getElementById('status'),
+            fail:    document.getElementById('fail'),
+            keyblock:document.getElementById('keyblock'),
+            keyval:  document.getElementById('keyval'),
+            copy:    document.getElementById('copy'),
+            note:    document.getElementById('note')
+        };
+
+        function rand(n, alphabet) {
+            var buf = new Uint32Array(n);
+            (window.crypto || window.msCrypto).getRandomValues(buf);
+            var out = '';
+            for (var i = 0; i < n; i++) out += alphabet.charAt(buf[i] % alphabet.length);
+            return out;
+        }
+
+        function read()   { try { return JSON.parse(sessionStorage.getItem(STORE)); } catch (e) { return null; } }
+        function write(o) { try { sessionStorage.setItem(STORE, JSON.stringify(o)); } catch (e) {} }
+
+        /* Lands on a path we deliberately never rewrite, so the host answers
+           with 404.html and a genuine 404 status instead of a page pretending. */
+        function spent() { location.replace('/checkpoint-already-used-' + rand(6, ALNUM)); }
+
+        function fail(text) {
+            el.status.textContent = '';
+            el.track.style.display = 'none';
+            el.fail.textContent = text;
+            el.fail.className = 'fail on';
+        }
+
+        function setStatus(text) { el.status.textContent = text; }
+
+        function param(name) {
+            try { return new URLSearchParams(location.search).get(name); } catch (e) { return null; }
+        }
+
+        /* Non-destructive: only the server burns a token, and only when it is
+           actually about to hand a key out. */
+        function tokenValid(token) {
+            return fetch(WORK + '/_api/v2/token/isValid/' + encodeURIComponent(token), {
+                headers: { 'Accept': 'application/json' }
+            })
+                .then(function (r) {
+                    if (!r.ok) throw new Error('work.ink answered ' + r.status);
+                    return r.json();
+                })
+                .then(function (j) { return !!(j && j.valid); });
+        }
+
+        function override(destination) {
+            return fetch(WORK + '/_api/v2/override?destination=' + encodeURIComponent(destination), {
+                headers: { 'Accept': 'application/json' }
+            })
+                .then(function (r) {
+                    if (!r.ok) throw new Error('work.ink answered ' + r.status);
+                    return r.json();
+                })
+                .then(function (j) {
+                    if (!j || !j.sr) throw new Error('work.ink returned no redirect token');
+                    return j.sr;
+                });
+        }
+
+        function noToken(what) {
+            fail('Checkpoint ' + what + ' came back without a token, so there is no proof it was ' +
+                 'completed and no key can be issued. The destination URL has to contain {TOKEN} ' +
+                 'for work.ink to fill in.');
+        }
+
+        /* ------------------------------------------------------------------ */
+        /* Step 1 -> 2                                                        */
+        /* ------------------------------------------------------------------ */
+        function handleC1(auth) {
+            var st = read();
+            if (!st || st.auth !== auth || st.step !== 1) { spent(); return; }
+
+            var token = param('token');
+            if (!token || token === '{TOKEN}') { noToken(1); return; }
+
+            setStatus('Verifying Checkpoint 1…');
+
+            tokenValid(token).then(function (ok) {
+                if (!ok) { fail('Checkpoint 1 could not be verified with work.ink. Run it again.'); return; }
+
+                st.step = 2;
+                st.t1 = token;
+                write(st);
+
+                setStatus('Preparing Checkpoint 2…');
+
+                return override(SITE + '/key/auth=' + auth + '/c2?token={TOKEN}').then(function (sr) {
+                    setStatus('Opening Checkpoint 2…');
+                    location.replace(HC2 + '?sr=' + encodeURIComponent(sr));
+                });
+            }).catch(function (e) {
+                fail('Could not verify Checkpoint 1 — ' + (e && e.message ? e.message : 'network error') + '. Reload to try again.');
+            });
+        }
+
+        /* ------------------------------------------------------------------ */
+        /* Step 2 -> success                                                  */
+        /* ------------------------------------------------------------------ */
+        function handleC2(auth) {
+            var st = read();
+            if (!st || st.auth !== auth || st.step !== 2 || !st.t1) { spent(); return; }
+
+            var token = param('token');
+            if (!token || token === '{TOKEN}') { noToken(2); return; }
+
+            setStatus('Verifying Checkpoint 2…');
+
+            tokenValid(token).then(function (ok) {
+                if (!ok) { fail('Checkpoint 2 could not be verified with work.ink. Run it again.'); return; }
+
+                st.step = 3;
+                st.t2 = token;
+                st.success = rand(15, ALNUM);
+                write(st);
+
+                /* One URL, one job: the success address is only ever reached
+                   from here, so it never has to trust the query string. */
+                location.replace('/key/success=' + st.success);
+            }).catch(function (e) {
+                fail('Could not verify Checkpoint 2 — ' + (e && e.message ? e.message : 'network error') + '. Reload to try again.');
+            });
+        }
+
+        /* ------------------------------------------------------------------ */
+        /* The key                                                            */
+        /* ------------------------------------------------------------------ */
+        function showKey(key) {
+            el.track.className = 'track done';
+            el.status.textContent = '';
+            el.step.textContent = 'COMPLETE';
+            el.title.textContent = 'Key issued';
+            el.lead.innerHTML = 'Both checkpoints verified. This key is bound to <b>Horizon External</b>.';
+            el.keyval.textContent = key;
+            el.keyblock.className = 'keyblock on';
+            el.note.innerHTML = 'Single-use. Check it any time at <code>/key/verify/key=' +
+                                key.replace(/[<>&]/g, '') + '</code>';
+        }
+
+        function handleSuccess(token) {
+            var st = read();
+            if (!st || st.step !== 3 || st.success !== token || !st.t1 || !st.t2) { spent(); return; }
+
+            /* Already issued in this tab: show it again without spending the
+               burned checkpoint tokens a second time. */
+            if (st.key) { showKey(st.key); return; }
+
+            setStatus('Issuing your key…');
+
+            fetch('/api/key/issue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ auth: st.auth, t1: st.t1, t2: st.t2 })
+            })
+                .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
+                .then(function (res) {
+                    if (!res.ok || !res.body.key) {
+                        fail('The key could not be issued — ' +
+                             (res.body && res.body.error ? res.body.error : 'server error') + '.');
+                        return;
+                    }
+                    st.key = res.body.key;
+                    write(st);
+                    showKey(res.body.key);
+                })
+                .catch(function () {
+                    fail('The key service is unreachable. Reload to try again.');
+                });
+        }
+
+        /* ------------------------------------------------------------------ */
+        el.copy.addEventListener('click', function () {
+            var text = el.keyval.textContent;
+            if (!text) return;
+
+            function done() {
+                el.copy.textContent = 'Copied';
+                el.copy.className = 'copy done';
+                setTimeout(function () {
+                    el.copy.textContent = 'Copy';
+                    el.copy.className = 'copy';
+                }, 1800);
+            }
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(done, fallback);
+            } else {
+                fallback();
+            }
+
+            function fallback() {
+                var ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); done(); } catch (e) {}
+                document.body.removeChild(ta);
+            }
+        });
+
+        /* ------------------------------------------------------------------ */
+        var path = location.pathname;
+
+        var mStep = path.match(/^\/key\/auth=([^/]+)\/(c1|c2)\/?$/);
+        var mDone = path.match(/^\/key\/success=([^/]+)\/?$/);
+
+        if (mStep && mStep[2] === 'c1') {
+            el.step.textContent = 'CHECKPOINT 2 OF 2';
+            el.title.textContent = 'Checkpoint 1 done';
+            el.lead.textContent = 'Checking that Checkpoint 1 really finished, then opening Checkpoint 2.';
+            handleC1(mStep[1]);
+        } else if (mStep && mStep[2] === 'c2') {
+            el.step.textContent = 'FINAL STEP';
+            el.title.textContent = 'Checkpoint 2 done';
+            el.lead.textContent = 'Both checkpoints are in. Issuing your key.';
+            handleC2(mStep[1]);
+        } else if (mDone) {
+            handleSuccess(mDone[1]);
+        } else {
+            /* /key/verify/... on a host with no function, or anything else. */
+            spent();
+        }
+    })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "name": "horizon-web",
+  "private": true,
+  "type": "module",
+  "description": "Horizon site. There is no build step - this file exists so Vercel treats middleware.js as an ES module."
+}

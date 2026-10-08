@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#030304">
+    <meta name="robots" content="noindex,nofollow">
+
+    <title>Horizon — Get Key</title>
+
+    <!-- Absolute paths: this document is served for /get_key/*, so relative
+         links would resolve one directory too high. -->
+    <link rel="icon" type="image/png" href="/assets/horizonnn.png">
+    <link rel="apple-touch-icon" href="/assets/horizonnn.png">
+
+    <style>
+        /* Self-contained on purpose: this page must read correctly even if the
+           main stylesheet fails to load. Values mirror /assets/index.css. */
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { margin: 0; background: #030304; color: #f7f7f8; }
+        body {
+            min-height: 100vh;
+            font-family: Inter, system-ui, -apple-system, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            display: flex;
+            flex-direction: column;
+        }
+        a { color: inherit; text-decoration: none; }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 22px 30px;
+        }
+        .brand { display: flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: .04em; }
+        .brand-mark { display: inline-flex; width: 26px; height: 26px; }
+        .brand-mark img { width: 100%; height: 100%; object-fit: contain; }
+
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 460px;
+            background: #0a0a0c;
+            border: 1px solid #1c1c21;
+            border-radius: 16px;
+            padding: 38px 34px;
+            text-align: center;
+        }
+
+        .step {
+            font: 600 11px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            letter-spacing: .22em;
+            color: #85858d;
+            margin-bottom: 18px;
+        }
+
+        h1 { font-size: 30px; line-height: 1.15; margin: 0 0 12px; letter-spacing: -.02em; }
+
+        .lead { margin: 0 0 26px; color: #a1a1aa; font-size: 14.5px; line-height: 1.65; }
+        .lead b { color: #f7f7f8; font-weight: 600; }
+
+        .track {
+            position: relative;
+            height: 4px;
+            border-radius: 99px;
+            background: #1c1c21;
+            overflow: hidden;
+            margin-bottom: 22px;
+        }
+        .track span {
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 38%;
+            border-radius: 99px;
+            background: #f7f7f8;
+            animation: slide 1.15s ease-in-out infinite;
+        }
+        @keyframes slide {
+            0%   { transform: translateX(-100%); }
+            100% { transform: translateX(340%); }
+        }
+
+        .status {
+            font: 600 12.5px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            color: #85858d;
+            min-height: 18px;
+            word-break: break-word;
+        }
+
+        .fail {
+            display: none;
+            margin-top: 20px;
+            padding: 14px;
+            border: 1px solid #4a1d22;
+            background: #170b0d;
+            border-radius: 10px;
+            color: #ff9ba3;
+            font-size: 13.5px;
+            line-height: 1.6;
+            text-align: left;
+        }
+        .fail.on { display: block; }
+
+        .retry {
+            display: none;
+            margin-top: 14px;
+            padding: 11px 20px;
+            border: 1px solid #1c1c21;
+            background: #f7f7f8;
+            color: #030304;
+            border-radius: 9px;
+            font: 600 13.5px inherit;
+            cursor: pointer;
+        }
+        .retry.on { display: inline-block; }
+
+        footer {
+            padding: 22px 30px 30px;
+            text-align: center;
+            font-size: 12.5px;
+            color: #85858d;
+        }
+    </style>
+</head>
+
+<body oncontextmenu="return false">
+    <nav class="nav">
+        <a class="brand" href="/">
+            <span class="brand-mark"><img src="/assets/horizonnn.png" alt="Horizon"></span>
+            <span>HORIZON</span>
+        </a>
+    </nav>
+
+    <main>
+        <div class="card">
+            <div class="step">CHECKPOINT 1 OF 2</div>
+            <h1>Get your key</h1>
+            <p class="lead">
+                Two short checkpoints stand between you and the key.
+                Nothing is stored — the progress only lives in <b>this tab</b>.
+            </p>
+
+            <div class="track"><span></span></div>
+            <div class="status" id="status">Preparing the first checkpoint…</div>
+
+            <div class="fail" id="fail"></div>
+            <button class="retry" id="retry" type="button">Try again</button>
+        </div>
+    </main>
+
+    <footer>Keys are single-use and verified against work.ink before they are issued.</footer>
+
+    <script>
+    (function () {
+        'use strict';
+
+        var STORE   = 'horizon.keyflow';
+        var WORK    = 'https://work.ink';
+        var HC1     = WORK + '/3440/hc1';
+        var SITE    = location.origin;
+
+        /* No look-alike characters: 0/O and 1/l/I are deliberately out. */
+        var ALNUM = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+
+        var statusEl = document.getElementById('status');
+        var failEl   = document.getElementById('fail');
+        var retryEl  = document.getElementById('retry');
+
+        function rand(n) {
+            var buf = new Uint32Array(n);
+            (window.crypto || window.msCrypto).getRandomValues(buf);
+            var out = '';
+            for (var i = 0; i < n; i++) out += ALNUM.charAt(buf[i] % ALNUM.length);
+            return out;
+        }
+
+        function read()  { try { return JSON.parse(sessionStorage.getItem(STORE)); } catch (e) { return null; } }
+        function write(o) { try { sessionStorage.setItem(STORE, JSON.stringify(o)); } catch (e) {} }
+
+        /* A spent page leads to a path that is deliberately NOT rewritten, so the
+           host serves 404.html with a real 404 status rather than a fake one. */
+        function spent() { location.replace('/checkpoint-already-used-' + rand(6)); }
+
+        function fail(text) {
+            statusEl.textContent = '';
+            failEl.textContent = text;
+            failEl.className = 'fail on';
+            retryEl.className = 'retry on';
+        }
+
+        retryEl.addEventListener('click', function () {
+            failEl.className = 'fail';
+            retryEl.className = 'retry';
+            statusEl.textContent = 'Retrying…';
+            start();
+        });
+
+        /* Ask work.ink to send the user back to a URL of ours once this
+           checkpoint is done. {TOKEN} is filled in by work.ink at redirect
+           time - it is the only thing that proves the checkpoint happened. */
+        function override(destination) {
+            return fetch(WORK + '/_api/v2/override?destination=' + encodeURIComponent(destination), {
+                headers: { 'Accept': 'application/json' }
+            })
+                .then(function (r) {
+                    if (!r.ok) throw new Error('work.ink answered ' + r.status);
+                    return r.json();
+                })
+                .then(function (j) {
+                    if (!j || !j.sr) throw new Error('work.ink returned no redirect token');
+                    return j.sr;
+                });
+        }
+
+        function start() {
+            /* One key per tab: once this browser holds a key the entry point
+               is spent and goes straight to a 404. */
+            var existing = read();
+            if (existing && existing.key) { spent(); return; }
+
+            var auth = rand(12);
+            write({ auth: auth, step: 1, started: Date.now() });
+
+            statusEl.textContent = 'Preparing Checkpoint 1…';
+
+            override(SITE + '/key/auth=' + auth + '/c1?token={TOKEN}')
+                .then(function (sr) {
+                    statusEl.textContent = 'Opening Checkpoint 1…';
+                    location.replace(HC1 + '?sr=' + encodeURIComponent(sr));
+                })
+                .catch(function (e) {
+                    fail('Could not start Checkpoint 1 — ' +
+                         (e && e.message ? e.message : 'network error') +
+                         '. Checkpoint 1 has to be reachable for a key to be issued.');
+                });
+        }
+
+        start();
+    })();
+    </script>
+</body>
+</html>

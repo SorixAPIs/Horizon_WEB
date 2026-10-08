@@ -2,12 +2,18 @@
 
 Source for **[gethorizon.kdns.fr](https://gethorizon.kdns.fr/)** — the public site for Horizon, a keyless Roblox executor.
 
-Static site. No build step, no framework, no server runtime — open `index.html` or point any static host at the repo root.
+Static site. No build step and no framework — open `index.html` or point any
+static host at the repo root. One exception: `middleware.js` is Vercel Routing
+Middleware, and only powers the two key-system endpoints (see below).
 
 ```
 /
 ├── index.html          Home + Status (single page, two views)
 ├── 404.html            Custom "page not found" (used by Netlify / GitHub Pages / Cloudflare Pages)
+├── get_key.html        Key flow — entry, /get_key/v=1
+├── key.html            Key flow — checkpoint callbacks + the key page
+├── middleware.js       /key/verify/* and /api/key/issue (Vercel only)
+├── package.json        Exists only so middleware.js is treated as an ES module
 ├── assets/
 │   ├── index.css       Stylesheet
 │   ├── index.js        All site logic (nav, Status page, download modal, polling)
@@ -28,6 +34,7 @@ Static site. No build step, no framework, no server runtime — open `index.html
 | --- | --- |
 | `/` | Home + Status (toggle with the nav tabs) |
 | `/API/fetch` | Live JSON for both builds — polled every 10 s |
+| `/get_key/v=1` | Starts the two-checkpoint key flow |
 | `/404` | Served automatically for any unknown URL |
 | `/beta`, `/docs`, `/tos`, `/home` | Hidden — redirect away unless `?key=horizon` is present |
 
@@ -69,6 +76,62 @@ the first that returns parseable JSON:
 The clean transport gets a solo attempt first, so a working setup logs **zero**
 console errors; the others are only raced if it fails. Once a transport wins it
 is remembered for every later request.
+
+## Key system
+
+`/get_key/v=1` opens a two-checkpoint chain that ends on a page showing a
+single-use key with a Copy button.
+
+| Step | URL | What happens |
+| --- | --- | --- |
+| 1 | `/get_key/v=1` | mints an `auth`, tells work.ink to bounce back here, redirects to Checkpoint 1 |
+| 2 | `/key/auth=<auth>/c1` | proves Checkpoint 1 finished → redirects to Checkpoint 2 |
+| 3 | `/key/auth=<auth>/c2` | proves Checkpoint 2 finished → mints a `success` token |
+| 4 | `/key/success=<token>` | calls the issue endpoint, shows the key |
+| — | `/key/verify/key=<KEY>` | looks a key up in the gist |
+
+### Why it cannot just be typed in
+
+Each redirect to work.ink carries a `{TOKEN}` placeholder in its destination,
+which work.ink fills in when it sends the visitor back. Only work.ink can
+produce one, so there is nothing to forge.
+
+`middleware.js` validates **both** tokens server-side against
+`work.ink/_api/v2/token/isValid`, then burns them with `?deleteToken=1` so the
+same pair can never mint a second key. None of that check lives in page
+JavaScript, so editing `key.html` buys nothing.
+
+What is *not* protected: step order and one-time use are enforced with
+`sessionStorage`, which can be cleared. That only earns a restart — fresh
+work.ink tokens are still required.
+
+Each step URL is spent once. Revisiting a used one redirects to a path that is
+deliberately never rewritten, so the host returns a real `404`. `/get_key/v=1`
+keeps working until a key has actually been issued.
+
+### Setup
+
+The gist is **private**, so both endpoints need a token:
+
+1. GitHub → Settings → Developer settings → Personal access tokens →
+   **Tokens (classic)** → generate with the **`gist`** scope only.
+   (Fine-grained tokens cannot reach gists.)
+2. Vercel → Project → Settings → Environment Variables → add `GIST_TOKEN` →
+   redeploy.
+
+Without it, issuing answers `503 key storage is not configured` *before* any
+checkpoint token is spent, so nobody loses progress. Issued keys are appended as
+`<key> <unix seconds>` beneath the existing `HORIZON-OWNER` line.
+
+### Where it runs
+
+`middleware.js` is Vercel **Routing Middleware**, deliberately not an `api/`
+function: the repo already has an uppercase `API/` folder, and the two cannot
+coexist on a case-insensitive filesystem. Middleware also runs before rewrites,
+so `/key/verify/*` is answered before `/key/:path*` hands it to `key.html`.
+
+On a host that only reads `_redirects`, both endpoints 404 and the flow stops at
+step 4.
 
 ## Status page
 
