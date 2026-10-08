@@ -84,11 +84,23 @@ single-use key with a Copy button.
 
 | Step | URL | What happens |
 | --- | --- | --- |
-| 1 | `/get_key/v=1` | mints an `auth`, tells work.ink to bounce back here, redirects to Checkpoint 1 |
+| 1 | `/get_key/v=1` | mints an `auth`, tells work.ink to bounce back here, then **holds a 60-second countdown** before opening Checkpoint 1 |
 | 2 | `/key/auth=<auth>/c1` | proves Checkpoint 1 finished → redirects to Checkpoint 2 |
 | 3 | `/key/auth=<auth>/c2` | proves Checkpoint 2 finished → mints a `success` token |
 | 4 | `/key/success=<token>` | calls the issue endpoint, shows the key |
 | — | `/key/verify/key=<KEY>` | looks a key up in the gist |
+
+### The minute before Checkpoint 1
+
+The entry page does not hand anyone straight to work.ink. It shows a countdown
+of `HOLD_MS` (60 s) with a filling bar, holding the redirect token it already
+has, and only follows it when the timer reaches zero.
+
+That deadline is `holdFrom + HOLD_MS`, saved in `sessionStorage`, so a reload
+resumes the same clock rather than restarting it — otherwise staying put would
+be one refresh away. It is stored as a timestamp, not a counter, because
+background tabs throttle timers and a timestamp still lands correctly the
+moment the tab is looked at again.
 
 ### Why it cannot just be typed in
 

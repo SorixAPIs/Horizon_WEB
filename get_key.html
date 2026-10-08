@@ -88,6 +88,23 @@
             100% { transform: translateX(340%); }
         }
 
+        /* Determinate version of the same bar: used for the hold countdown. */
+        .track.fill span {
+            width: 0%;
+            animation: none;
+            transition: width .95s linear;
+        }
+
+        .count {
+            display: none;
+            font: 700 46px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            letter-spacing: -.02em;
+            font-variant-numeric: tabular-nums;
+            color: #f7f7f8;
+            margin: 6px 0 16px;
+        }
+        .count.on { display: block; }
+
         .status {
             font: 600 12.5px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
             color: #85858d;
@@ -145,10 +162,12 @@
             <h1>Get your key</h1>
             <p class="lead">
                 Two short checkpoints stand between you and the key.
+                Hold on for a minute and Checkpoint 1 opens on its own.
                 Nothing is stored — the progress only lives in <b>this tab</b>.
             </p>
 
-            <div class="track"><span></span></div>
+            <div class="track" id="track"><span></span></div>
+            <div class="count" id="count">1:00</div>
             <div class="status" id="status">Preparing the first checkpoint…</div>
 
             <div class="fail" id="fail"></div>
@@ -167,12 +186,23 @@
         var HC1     = WORK + '/3440/hc1';
         var SITE    = location.origin;
 
+        /* The card holds on this page for at least this long before it sends
+           anyone on to Checkpoint 1. */
+        var HOLD_MS = 60 * 1000;
+
         /* No look-alike characters: 0/O and 1/l/I are deliberately out. */
         var ALNUM = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
 
         var statusEl = document.getElementById('status');
         var failEl   = document.getElementById('fail');
         var retryEl  = document.getElementById('retry');
+        var countEl  = document.getElementById('count');
+        var trackEl  = document.getElementById('track');
+        var fillEl   = trackEl.firstElementChild;
+
+        var timer = null;
+        var holding = false;
+        var redirected = false;
 
         function rand(n) {
             var buf = new Uint32Array(n);
@@ -190,7 +220,14 @@
         function spent() { location.replace('/checkpoint-already-used-' + rand(6)); }
 
         function fail(text) {
+            if (timer) { clearInterval(timer); timer = null; }
+            holding = false;
+
             statusEl.textContent = '';
+            countEl.className = 'count';
+            trackEl.className = 'track';
+            fillEl.style.width = '';
+
             failEl.textContent = text;
             failEl.className = 'fail on';
             retryEl.className = 'retry on';
@@ -220,21 +257,74 @@
                 });
         }
 
+        /* Hold the card for the rest of the minute, then send the visitor on.
+           The deadline is a timestamp instead of a counter: a background tab
+           throttles timers, so counting down by hand would drift, while a
+           timestamp still lands correctly the moment the tab is looked at. */
+        function hold(st) {
+            if (holding || redirected) return;
+            holding = true;
+
+            trackEl.className = 'track fill';
+            countEl.className = 'count on';
+            statusEl.textContent = 'Checkpoint 1 is ready — opening shortly';
+
+            function tick() {
+                if (redirected) return;
+
+                var left = st.readyAt - Date.now();
+
+                if (left <= 0) {
+                    redirected = true;
+                    countEl.textContent = '0:00';
+                    fillEl.style.width = '100%';
+                    location.replace(HC1 + '?sr=' + encodeURIComponent(st.sr));
+                    return;
+                }
+
+                var secs = Math.ceil(left / 1000);
+                var m = Math.floor(secs / 60);
+                var s = secs % 60;
+                countEl.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+                fillEl.style.width = Math.min(100, (1 - left / HOLD_MS) * 100) + '%';
+            }
+
+            tick();
+            timer = setInterval(tick, 250);
+
+            document.addEventListener('visibilitychange', function () {
+                if (!document.hidden) tick();
+            });
+        }
+
         function start() {
             /* One key per tab: once this browser holds a key the entry point
                is spent and goes straight to a 404. */
             var existing = read();
             if (existing && existing.key) { spent(); return; }
 
-            var auth = rand(12);
-            write({ auth: auth, step: 1, started: Date.now() });
+            /* Reuse the attempt already under way in this tab. The clock is
+               deliberately NOT restarted on a reload — otherwise staying on
+               this page would be one refresh away, and the minute promised
+               to the visitor would mean nothing. */
+            var st = (existing && existing.step === 1) ? existing : {};
+            if (!st.auth) st.auth = rand(12);
+            if (!st.holdFrom) st.holdFrom = Date.now();
+
+            st.step = 1;
+            st.readyAt = st.holdFrom + HOLD_MS;
+            write(st);
+
+            /* Already holding a redirect token: just count down. */
+            if (st.sr) { hold(st); return; }
 
             statusEl.textContent = 'Preparing Checkpoint 1…';
 
-            override(SITE + '/key/auth=' + auth + '/c1?token={TOKEN}')
+            override(SITE + '/key/auth=' + st.auth + '/c1?token={TOKEN}')
                 .then(function (sr) {
-                    statusEl.textContent = 'Opening Checkpoint 1…';
-                    location.replace(HC1 + '?sr=' + encodeURIComponent(sr));
+                    st.sr = sr;
+                    write(st);
+                    hold(st);
                 })
                 .catch(function (e) {
                     fail('Could not start Checkpoint 1 — ' +
