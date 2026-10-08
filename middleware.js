@@ -10,7 +10,8 @@
    folder cannot exist beside it on a case-insensitive filesystem. Middleware
    keeps the two apart without moving a single file that already works.
 
-     GET  /key/verify/key=<KEY>   look a key up in the gist
+     GET  /key/verify/key=<KEY>       look a key up in the gist
+     GET  /key/verify/key=<KEY>/raw   same, always JSON whatever the client is
      POST /api/key/issue          burn both work.ink tokens, mint a key
 
    Both need GIST_TOKEN in the project environment (gist read + write).
@@ -44,8 +45,8 @@ function cors(extra) {
   );
 }
 
-function json(status, body) {
-  return new Response(JSON.stringify(body), {
+function json(status, body, indent) {
+  return new Response(JSON.stringify(body, null, indent || 0), {
     status: status,
     headers: cors({ 'Content-Type': 'application/json; charset=utf-8' })
   });
@@ -294,21 +295,36 @@ async function handleVerify(request, url) {
   if (request.method === 'OPTIONS') return preflight('GET, OPTIONS');
   if (request.method !== 'GET')     return json(405, { error: 'use GET' });
 
-  const match = url.pathname.match(/^\/key\/verify\/key=([^/]+)$/);
+  /* /key/verify/key=<KEY>/raw is the machine-readable form. It answers JSON
+     for every status - success, unknown key, bad path, storage down - whatever
+     Accept header arrives with, so an app never has to negotiate for it or
+     scrape HTML. The plain address still prefers HTML so a browser gets a page. */
+  let pathname = url.pathname;
+  const isRaw = /\/raw\/?$/i.test(pathname);
+  if (isRaw) pathname = pathname.replace(/\/raw\/?$/i, '');
+
+  const match = pathname.match(/^\/key\/verify\/key=([^/]+)\/?$/);
 
   const accept = String(request.headers.get('accept') || '');
-  const forceJson = new URL(url).searchParams.get('format') === 'json';
+  const forceJson = isRaw || new URL(url).searchParams.get('format') === 'json';
   const wantsHtml = !forceJson && accept.indexOf('text/html') >= 0;
 
+  /* Pretty-printed only in the /raw form: it is meant to be opened and read. */
+  const pretty = isRaw ? 2 : 0;
+
   if (!match) {
-    const payload = { valid: false, error: 'bad verify path', usage: '/key/verify/key=<KEY>' };
+    const payload = {
+      valid: false,
+      error: 'bad verify path',
+      usage: '/key/verify/key=<KEY>  —  append /raw for JSON only'
+    };
     if (wantsHtml) {
       return new Response(renderHtml(payload), {
         status: 400,
         headers: cors({ 'Content-Type': 'text/html; charset=utf-8' })
       });
     }
-    return json(400, payload);
+    return json(400, payload, pretty);
   }
 
   const key = decodeURIComponent(match[1]);
@@ -344,7 +360,7 @@ async function handleVerify(request, url) {
         headers: cors({ 'Content-Type': 'text/html; charset=utf-8' })
       });
     }
-    return json(result.valid ? 200 : 404, result);
+    return json(result.valid ? 200 : 404, result, pretty);
   } catch (err) {
     const notConfigured = err && err.code === 'NOT_CONFIGURED';
     const payload = {
@@ -358,7 +374,7 @@ async function handleVerify(request, url) {
         headers: cors({ 'Content-Type': 'text/html; charset=utf-8' })
       });
     }
-    return json(notConfigured ? 503 : 502, payload);
+    return json(notConfigured ? 503 : 502, payload, pretty);
   }
 }
 

@@ -88,7 +88,8 @@ single-use key with a Copy button.
 | 2 | `/key/auth=<auth>/c1` | proves Checkpoint 1 finished → redirects to Checkpoint 2 |
 | 3 | `/key/auth=<auth>/c2` | proves Checkpoint 2 finished → mints a `success` token |
 | 4 | `/key/success=<token>` | calls the issue endpoint, shows the key |
-| — | `/key/verify/key=<KEY>` | looks a key up in the gist |
+| — | `/key/verify/key=<KEY>` | looks a key up in the gist — HTML in a browser, JSON otherwise |
+| — | `/key/verify/key=<KEY>/raw` | same answer, **always JSON** — the one to point an app at |
 
 ### The minute before Checkpoint 1
 
@@ -162,6 +163,46 @@ cover the whole run. At the default **5 minutes** a visitor who watches an ad
 for six loses both checkpoints. **Set it to `1440`** (24 h) in the work.ink
 dashboard — tokens are burned with `deleteToken=1` on issue, so a long window
 does not make them reusable.
+
+### Checking a key from an app
+
+```
+GET https://gethorizon.kdns.fr/key/verify/key=<KEY>/raw
+```
+
+`/raw` answers JSON for **every** outcome — unknown key, bad path, storage
+down — so a client never has to send a particular `Accept` header or scrape
+HTML. The plain address does the opposite: it prefers HTML whenever the
+request looks like a browser, which is what makes it readable by eye.
+
+| Status | Body | Meaning |
+| --- | --- | --- |
+| `200` | `{"valid":true, …}` | good |
+| `404` | `{"valid":false, …}` | unknown **or** past 24 h (`"expired":true`) |
+| `400` | `{"valid":false,"error":"bad verify path"}` | address was wrong |
+| `503` | `… "key storage is not configured"` | `GIST_TOKEN` missing |
+| `502` | `… "lookup failed"` | gist unreachable |
+
+```json
+{
+  "valid": true,
+  "key": "qeXgigpXLyBvdmyfxZy",
+  "expired": false,
+  "message": null,
+  "generatedAt": 1791489670,
+  "ageSeconds": 46,
+  "expiresInSeconds": 86354,
+  "issued": 1
+}
+```
+
+`expiresInSeconds` is the useful field for an app: stop treating the key as
+good when it reaches `0` rather than waiting for a later call to say no.
+Everything carries `Access-Control-Allow-Origin: *` and
+`Cache-Control: no-store`, so it is callable straight from browser code with
+no proxy in front.
+
+`?format=json` on the plain address does the same job with compact output.
 
 ### Setup
 
