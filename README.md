@@ -17,7 +17,8 @@ Middleware, and only powers the two key-system endpoints (see below).
 ├── assets/
 │   ├── index.css       Stylesheet
 │   ├── index.js        All site logic (nav, Status page, download modal, polling)
-│   └── hexion.png      Hexion.fun logo (local fallback)
+│   ├── hexion.png      Hexion.fun logo (nav + social cards, local fallback)
+│   └── hexion_nobg.png Hexion.fun icon (tab / apple-touch, transparent)
 ├── API/
 │   ├── fetch.js        Endpoint poller / transport chain shared by the whole site
 │   ├── fetch.html      /API/fetch  (extensionless-path twin)

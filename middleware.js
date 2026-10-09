@@ -215,7 +215,7 @@ function renderHtml(result) {
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
     '<meta name="theme-color" content="#030304"><meta name="robots" content="noindex,nofollow">' +
     '<title>Hexion.fun — Key check</title>' +
-    '<link rel="icon" type="image/png" href="/assets/hexion.png">' +
+    '<link rel="icon" type="image/png" href="/assets/hexion_nobg.png">' +
     '<style>' +
     '*,*::before,*::after{box-sizing:border-box}' +
     'html,body{margin:0;background:#030304;color:#f7f7f8;font-family:Inter,system-ui,sans-serif}' +
