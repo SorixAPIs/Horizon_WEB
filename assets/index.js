@@ -49,10 +49,17 @@ function icon(name, size, cls) {
    ------------------------------------------------------------------------- */
 const LOGO_REMOTE = 'http://paloma.hidencloud.com:24617/cdn/Hexion.png';
 const LOGO_LOCAL  = 'assets/hexion.png';
-/* Builds live on the Hexion.fun CDN rather than in this repo. Hexion-Internal.zip
-   is not uploaded yet: flip INTERNAL_READY to true once it is, and the Internal
-   button switches from "COMING SOON" to a real download on its own. */
-const CDN_BASE = 'http://paloma.hidencloud.com:24617/cdn/';
+/* Builds live on the Hexion.fun CDN rather than in this repo, but they are
+   pulled through this site's own /cdn/ route (vercel.json + _redirects) so the
+   browser downloads same-origin: the `download` attribute is honoured, no stray
+   tab opens, the HEAD pre-check in startDownload can actually run, and nothing
+   is mixed content from https://. The route proxies the CDN verbatim, so any
+   file uploaded there is reachable without editing this file.
+
+   Hexion-Internal.zip is not uploaded yet: flip INTERNAL_READY to true once it
+   is, and the Internal button switches from "COMING SOON" to a real download
+   on its own. */
+const CDN_BASE = '/cdn/';
 const DOWNLOAD_URLS = {
   external: CDN_BASE + 'Hexion-External.zip',
   internal: CDN_BASE + 'Hexion-Internal.zip'

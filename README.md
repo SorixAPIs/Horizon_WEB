@@ -264,9 +264,12 @@ const LOGO_LOCAL  = 'assets/hexion.png';
 const DISCORD_INVITE = 'https://discord.gg/beM4pRtBdG';
 const API_ORIGIN = 'http://paloma.hidencloud.com:24617';
 
-/* Builds are served from the CDN, not from this repo. */
-const CDN_BASE = 'http://paloma.hidencloud.com:24617/cdn/';
-const DOWNLOAD_URLS = { external: '...External.zip', internal: '...Internal.zip' };
+/* Builds come from the CDN, proxied through this site's own /cdn/ route so
+   the download is same-origin (honoured `download` attr, no stray tab, the
+   HEAD pre-check can run, no mixed content). */
+const CDN_BASE = '/cdn/';
+const DOWNLOAD_URLS = { external: CDN_BASE + 'Hexion-External.zip',
+                         internal: CDN_BASE + 'Hexion-Internal.zip' };
 const INTERNAL_READY = false;   // flip once Hexion-Internal.zip is uploaded
 ```
 
@@ -288,12 +291,17 @@ Then open `http://localhost:3000` (or `:8000`).
 
 Any static host works. For the custom 404, the host must look for `404.html` at the site root (Netlify, GitHub Pages, Vercel and Cloudflare Pages all do).
 
-The live site is **[gethexion.kdns.fr](https://gethexion.kdns.fr/)** (Vercel). Two config files are shipped so the `/hexion-upstream/` passthrough works on either major host — **both are required for the site to reach the API from `https://`**, since mixed content blocks a direct call:
+The live site is **[gethexion.kdns.fr](https://gethexion.kdns.fr/)** (Vercel). Two config files are shipped so both passthroughs work on either major host — **the upstream one is required for the site to reach the API from `https://`**, since mixed content blocks a direct call:
+
+| path | why |
+| --- | --- |
+| `/hexion-upstream/:path*` | Status page → API (`paloma.hidencloud.com:24617`) |
+| `/cdn/:path*` | **every file on the CDN**, e.g. `/cdn/Hexion-External.zip`. Same-origin, so the Download button gets a real filename, no stray tab, and a working HEAD pre-check. Upload a file to the CDN and it is here with no code change. |
 
 | host | file | effect |
 | --- | --- | --- |
-| Vercel | `vercel.json` | rewrites `/hexion-upstream/:path*` → `http://paloma.hidencloud.com:24617/:path*` |
-| Netlify | `_redirects` | same rewrite, Netlify syntax |
+| Vercel | `vercel.json` | both rewrites above |
+| Netlify | `_redirects` | same two rewrites, Netlify syntax |
 
 On a host with neither (GitHub Pages, Cloudflare Pages), there is no same-origin passthrough and the Status page must fall back to a public relay. The alternative everywhere is to serve the API over `https://`, which would make the `direct` transport usable and both config files redundant.
 

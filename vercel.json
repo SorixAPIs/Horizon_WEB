@@ -9,6 +9,10 @@
       "destination": "/get_key.html"
     },
     {
+      "source": "/cdn/:path*",
+      "destination": "http://paloma.hidencloud.com:24617/cdn/:path*"
+    },
+    {
       "source": "/hexion-upstream/:path*",
       "destination": "http://paloma.hidencloud.com:24617/:path*"
     }

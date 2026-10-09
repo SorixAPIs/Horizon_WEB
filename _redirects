@@ -10,6 +10,18 @@
 
 /hexion-upstream/*  http://paloma.hidencloud.com:24617/:splat  200
 
+# Serve every file that exists on the CDN under this site's own origin:
+#
+#   https://gethexion.kdns.fr/cdn/Hexion-External.zip
+#
+# Same-origin means the browser honours the `download` attribute (proper
+# filename, no stray tab), the page can run its HEAD pre-check to show a real
+# error instead of an empty one, and nothing is mixed content from https://.
+# It proxies http://paloma.hidencloud.com:24617/cdn/* - any file you upload
+# there is reachable here with no code change.
+
+/cdn/*  http://paloma.hidencloud.com:24617/cdn/*  200
+
 # Key system: /get_key/v=1, /key/auth=<auth>/c1, /key/auth=<auth>/c2 and
 # /key/success=<token> are all served by the two pages below, which work out
 # which step they are from location.pathname.
