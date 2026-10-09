@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#030304">
     <meta name="robots" content="noindex,nofollow">
+    <meta name="description" content="The page you were looking for on Hexion.fun does not exist — it may have been moved or renamed. Head back to the homepage or check the system status.">
 
     <title>Hexion.fun — 404, page not found</title>
 
@@ -15,14 +16,16 @@
 
     <!-- Apply a stored colour theme before first paint (no flash). -->
     <script>
-        try {
-            var t = localStorage.getItem('hexion-theme');
-            if (t) document.documentElement.setAttribute('data-theme', t);
-        } catch (e) {}
+        var t = null;
+        try { t = localStorage.getItem('hexion-theme'); } catch (e) {}
+        /* The saved id must still exist in the switcher — anything else
+           (including a blocked localStorage) falls back to the default. */
+        document.documentElement.setAttribute('data-theme',
+            t === 'hexion' || t === 'halloween' ? t : 'hexion');
     </script>
 
-    <link rel="stylesheet" href="/assets/themes.css?v=20261009-2">
-    <link rel="stylesheet" href="/assets/index.css?v=20261009-2">
+    <link rel="stylesheet" href="/assets/themes.css?v=20261009-3">
+    <link rel="stylesheet" href="/assets/index.css?v=20261009-3">
 </head>
 
 <body oncontextmenu="return false">
@@ -41,7 +44,7 @@
             <a class="nav-ghost" href="/">Back to Hexion.fun</a>
         </nav>
 
-        <section class="coming-page">
+        <main class="coming-page">
             <span class="err-ghost" aria-hidden="true">404</span>
 
             <div class="coming-icon">
@@ -69,7 +72,7 @@
             </div>
 
             <span class="err-path" id="path" hidden></span>
-        </section>
+        </main>
 
         <footer>
             <span>Hexion.fun &mdash; your scripts, your space.</span>
@@ -77,7 +80,7 @@
         </footer>
     </div>
 
-    <script src="/assets/theme.js?v=20261009-2"></script>
+    <script src="/assets/theme.js?v=20261009-3"></script>
     <script>
         /* Show which URL missed, so broken links are easy to spot.
            Hidden by default so the page is complete without JavaScript. */

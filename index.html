@@ -25,22 +25,24 @@
     <!-- Apply a stored colour theme before first paint (no flash). The try/catch
          keeps a localStorage failure (private mode) from breaking anything. -->
     <script>
-        try {
-            var t = localStorage.getItem('hexion-theme');
-            if (t) document.documentElement.setAttribute('data-theme', t);
-        } catch (e) {}
+        var t = null;
+        try { t = localStorage.getItem('hexion-theme'); } catch (e) {}
+        /* The saved id must still exist in the switcher — anything else
+           (including a blocked localStorage) falls back to the default. */
+        document.documentElement.setAttribute('data-theme',
+            t === 'hexion' || t === 'halloween' ? t : 'hexion');
     </script>
 
     <!-- ASSET_VERSION caches pasted below: bump it whenever these files change
          and the change must be visible at once (see README → Deployment). -->
-    <link rel="stylesheet" href="assets/themes.css?v=20261009-2">
-    <link rel="stylesheet" href="assets/index.css?v=20261009-2">
+    <link rel="stylesheet" href="assets/themes.css?v=20261009-3">
+    <link rel="stylesheet" href="assets/index.css?v=20261009-3">
 </head>
 
 <body oncontextmenu="return false">
     <div id="root"></div>
-    <script src="API/fetch.js?v=20261009-2"></script>
-    <script src="assets/theme.js?v=20261009-2"></script>
-    <script src="assets/index.js?v=20261009-2"></script>
+    <script src="API/fetch.js?v=20261009-3"></script>
+    <script src="assets/theme.js?v=20261009-3"></script>
+    <script src="assets/index.js?v=20261009-3"></script>
 </body>
 </html>

@@ -286,6 +286,12 @@ function nav() {
     '<button data-nav="' + id + '"' + (state.page === id ? ' class="active"' : '') + '>' +
     label + (extra || '') + '</button>';
 
+  /* API Docs and Terms are their own pages (not SPA views). The links carry
+     ?key=hexion because both pages still bounce visitors who arrive without
+     it — with the key in the link, clicking a tab always works and a URL
+     copied from the address bar keeps working too. */
+  const pageTab = (href, label) => '<a href="' + href + '">' + label + '</a>';
+
   return (
     '<nav class="nav">' +
       '<button class="brand" data-nav="home">' +
@@ -295,8 +301,10 @@ function nav() {
       '<div class="nav-tabs">' +
         tab('home', 'Home') +
         tab('status', 'Status') +
+        pageTab('/docs/?key=hexion', 'API Docs') +
+        pageTab('/tos/?key=hexion', 'Terms') +
       '</div>' +
-      '<button class="nav-ghost" data-action="open-download">Get Hexion.fun</button>' +
+      '<button class="nav-ghost nav-ghost-cta" data-action="open-download">Get Hexion.fun</button>' +
     '</nav>'
   );
 }

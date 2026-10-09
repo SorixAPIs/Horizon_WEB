@@ -4,20 +4,30 @@
    One block per theme. Layout never lives here — only colour tokens, so any
    page that consumes the variables below re-skins instantly.
 
+   There are two themes:
+     hexion    the default look (warm monochrome, white accent)
+     halloween pumpkin orange + purple on a warm near-black
+
    Applied by setting data-theme on <html>:
-     <html data-theme="aurora">
+     <html data-theme="halloween">
 
    The attribute is written before first paint by a tiny inline script in each
-   <head> (see README → Themes), and persisted in localStorage under
-   `hexion-theme` by assets/theme.js, which also renders the switcher.
+   <head> (see README → Themes), persisted in localStorage under `hexion-theme`
+   by assets/theme.js, which also renders the switcher. theme.js validates the
+   saved id against its own list on every load: a value that no longer exists
+   is dropped and the default takes over, so a stale save can never produce a
+   half-themed page.
+
+   The halloween block carries colour only; the decorative flourishes that go
+   with it (bat swarm, hero glow) live in assets/index.css under
+   [data-theme="halloween"] so this file stays a pure palette.
 
    Selector note: this is deliberately :root[data-theme] (0,2,0) and not
    html[data-theme] (0,1,0). Both index.css and the hidden pages declare their
    defaults on plain :root (0,1,0) — an html[data-theme] block would TIE with
    those, and a tie is broken by load order, which stylesheets cannot rely on
    (themes.css is linked before index.css on every page). At (0,2,0) the theme
-   wins wherever it is linked, yet stays inert until the attribute exists, so
-   first-time visitors still see each page exactly as authored.
+   wins wherever it is linked.
    ========================================================================== */
 
 :root[data-theme="hexion"] {
@@ -46,132 +56,28 @@
   --meta-theme: #030304;
 }
 
-:root[data-theme="aurora"] {
-  --bg: #04070b;
-  --bg-glow: rgba(94, 234, 212, .07);
-  --surface: #080d14;
-  --surface-2: #0c141d;
-  --line: rgba(148, 210, 220, .11);
-  --line-strong: rgba(148, 210, 220, .22);
-  --text: #eefaf8;
+:root[data-theme="halloween"] {
+  --bg: #0a0609;
+  --bg-glow: rgba(255, 122, 26, .10);
+  --surface: #140b12;
+  --surface-2: #1c101b;
+  --line: rgba(255, 176, 110, .13);
+  --line-strong: rgba(255, 176, 110, .26);
+  --text: #fdf3e7;
   --text-bright: #ffffff;
-  --muted: #84a3a6;
-  --faint: #55757a;
-  --accent: #5eead4;
-  --accent-ink: #031311;
-  --accent-soft: rgba(94, 234, 212, .09);
-  --accent-glow: rgba(94, 234, 212, .30);
-  --accent-dim: rgba(94, 234, 212, .09);
-  --secondary: #38bdf8;
-  --border: rgba(148, 210, 220, .11);
-  --bg-subtle: #080d14;
-  --ok: #5ee39b;
-  --ok-soft: rgba(94, 227, 155, .13);
-  --bad: #ff8a8a;
-  --bad-soft: rgba(255, 138, 138, .13);
-  --meta-theme: #04070b;
-}
-
-:root[data-theme="violet"] {
-  --bg: #07050d;
-  --bg-glow: rgba(167, 139, 250, .08);
-  --surface: #0d0a16;
-  --surface-2: #13101f;
-  --line: rgba(190, 170, 255, .12);
-  --line-strong: rgba(190, 170, 255, .24);
-  --text: #f4f1fd;
-  --text-bright: #ffffff;
-  --muted: #9b93b8;
-  --faint: #665f85;
-  --accent: #a78bfa;
-  --accent-ink: #120a26;
-  --accent-soft: rgba(167, 139, 250, .10);
-  --accent-glow: rgba(167, 139, 250, .32);
-  --accent-dim: rgba(167, 139, 250, .10);
-  --secondary: #f472b6;
-  --border: rgba(190, 170, 255, .12);
-  --bg-subtle: #0d0a16;
-  --ok: #5ee39b;
-  --ok-soft: rgba(94, 227, 155, .13);
-  --bad: #ff7d92;
-  --bad-soft: rgba(255, 125, 146, .13);
-  --meta-theme: #07050d;
-}
-
-:root[data-theme="ember"] {
-  --bg: #0a0604;
-  --bg-glow: rgba(251, 146, 60, .08);
-  --surface: #130c07;
-  --surface-2: #1b120a;
-  --line: rgba(255, 190, 140, .12);
-  --line-strong: rgba(255, 190, 140, .24);
-  --text: #fdf6ef;
-  --text-bright: #ffffff;
-  --muted: #ab9787;
-  --faint: #776556;
-  --accent: #fb923c;
-  --accent-ink: #1c0e03;
-  --accent-soft: rgba(251, 146, 60, .10);
-  --accent-glow: rgba(251, 146, 60, .32);
-  --accent-dim: rgba(251, 146, 60, .10);
-  --secondary: #f43f5e;
-  --border: rgba(255, 190, 140, .12);
-  --bg-subtle: #130c07;
-  --ok: #6ee7a8;
-  --ok-soft: rgba(110, 231, 168, .13);
-  --bad: #ff7d7d;
-  --bad-soft: rgba(255, 125, 125, .13);
-  --meta-theme: #0a0604;
-}
-
-:root[data-theme="crimson"] {
-  --bg: #090406;
-  --bg-glow: rgba(255, 77, 109, .08);
-  --surface: #12070a;
-  --surface-2: #1a0b10;
-  --line: rgba(255, 160, 175, .12);
-  --line-strong: rgba(255, 160, 175, .24);
-  --text: #fdf2f4;
-  --text-bright: #ffffff;
-  --muted: #a88d94;
-  --faint: #755960;
-  --accent: #ff4d6d;
-  --accent-ink: #26050c;
-  --accent-soft: rgba(255, 77, 109, .10);
-  --accent-glow: rgba(255, 77, 109, .32);
-  --accent-dim: rgba(255, 77, 109, .10);
-  --secondary: #ff8fa3;
-  --border: rgba(255, 160, 175, .12);
-  --bg-subtle: #12070a;
-  --ok: #5ee39b;
-  --ok-soft: rgba(94, 227, 155, .13);
-  --bad: #ff6b81;
-  --bad-soft: rgba(255, 107, 129, .15);
-  --meta-theme: #090406;
-}
-
-:root[data-theme="daylight"] {
-  --bg: #f6f7f9;
-  --bg-glow: rgba(37, 99, 235, .05);
-  --surface: #ffffff;
-  --surface-2: #eef1f6;
-  --line: rgba(16, 22, 36, .10);
-  --line-strong: rgba(16, 22, 36, .20);
-  --text: #14161c;
-  --text-bright: #0a0c12;
-  --muted: #565b68;
-  --faint: #7c8290;
-  --accent: #2563eb;
-  --accent-ink: #ffffff;
-  --accent-soft: rgba(37, 99, 235, .08);
-  --accent-glow: rgba(37, 99, 235, .28);
-  --accent-dim: rgba(37, 99, 235, .08);
-  --secondary: #7c3aed;
-  --border: rgba(16, 22, 36, .10);
-  --bg-subtle: #eef1f6;
-  --ok: #16a34a;
-  --ok-soft: rgba(22, 163, 74, .10);
-  --bad: #dc2626;
-  --bad-soft: rgba(220, 38, 38, .09);
-  --meta-theme: #f6f7f9;
+  --muted: #b39a91;
+  --faint: #7d6862;
+  --accent: #ff7a1a;
+  --accent-ink: #1c0c00;
+  --accent-soft: rgba(255, 122, 26, .10);
+  --accent-glow: rgba(255, 122, 26, .35);
+  --accent-dim: rgba(255, 122, 26, .10);
+  --secondary: #b14bff;
+  --border: rgba(255, 176, 110, .13);
+  --bg-subtle: #140b12;
+  --ok: #7ddc4f;
+  --ok-soft: rgba(125, 220, 79, .13);
+  --bad: #ff4d4d;
+  --bad-soft: rgba(255, 77, 77, .13);
+  --meta-theme: #0a0609;
 }

@@ -15,15 +15,19 @@
 
     <!-- Apply a stored colour theme before first paint (no flash). -->
     <script>
-        try {
-            var t = localStorage.getItem('hexion-theme');
-            if (t) document.documentElement.setAttribute('data-theme', t);
-        } catch (e) {}
+        var t = null;
+        try { t = localStorage.getItem('hexion-theme'); } catch (e) {}
+        /* The saved id must still exist in the switcher — anything else
+           (including a blocked localStorage) falls back to the default. */
+        document.documentElement.setAttribute('data-theme',
+            t === 'hexion' || t === 'halloween' ? t : 'hexion');
     </script>
 
-    <link rel="stylesheet" href="/assets/themes.css?v=20261009-2">
+    <link rel="stylesheet" href="/assets/themes.css?v=20261009-3">
 
     <style>
+        @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap");
+
         /* Self-contained on purpose: this page must read correctly even if the
            main stylesheet fails to load. Every colour is a token with a local
            fallback, so /assets/themes.css re-skins it but its absence never
@@ -429,6 +433,6 @@
         start();
     })();
     </script>
-    <script src="/assets/theme.js?v=20261009-2"></script>
+    <script src="/assets/theme.js?v=20261009-3"></script>
 </body>
 </html>

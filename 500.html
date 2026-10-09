@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#030304">
     <meta name="robots" content="noindex,nofollow">
+    <meta name="description" content="Hexion.fun hit an internal server error while handling this request. That is ours to fix — trying again in a moment usually clears it.">
 
     <title>Hexion.fun — 500, something broke</title>
 
@@ -14,14 +15,16 @@
 
     <!-- Apply a stored colour theme before first paint (no flash). -->
     <script>
-        try {
-            var t = localStorage.getItem('hexion-theme');
-            if (t) document.documentElement.setAttribute('data-theme', t);
-        } catch (e) {}
+        var t = null;
+        try { t = localStorage.getItem('hexion-theme'); } catch (e) {}
+        /* The saved id must still exist in the switcher — anything else
+           (including a blocked localStorage) falls back to the default. */
+        document.documentElement.setAttribute('data-theme',
+            t === 'hexion' || t === 'halloween' ? t : 'hexion');
     </script>
 
-    <link rel="stylesheet" href="/assets/themes.css?v=20261009-2">
-    <link rel="stylesheet" href="/assets/index.css?v=20261009-2">
+    <link rel="stylesheet" href="/assets/themes.css?v=20261009-3">
+    <link rel="stylesheet" href="/assets/index.css?v=20261009-3">
 </head>
 
 <body oncontextmenu="return false">
@@ -34,7 +37,7 @@
             <a class="nav-ghost" href="/">Back to Hexion.fun</a>
         </nav>
 
-        <section class="coming-page">
+        <main class="coming-page">
             <span class="err-ghost" aria-hidden="true">500</span>
 
             <div class="coming-icon">
@@ -60,7 +63,7 @@
                 <a class="btn btn-primary" href="/">Back to Hexion.fun</a>
                 <a class="btn btn-secondary" href="/#status">Check system status</a>
             </div>
-        </section>
+        </main>
 
         <footer>
             <span>Hexion.fun &mdash; your scripts, your space.</span>
@@ -68,6 +71,6 @@
         </footer>
     </div>
 
-    <script src="/assets/theme.js?v=20261009-2"></script>
+    <script src="/assets/theme.js?v=20261009-3"></script>
 </body>
 </html>

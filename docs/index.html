@@ -22,354 +22,419 @@
     <title>Hexion.fun - Documentation</title>
     <link rel="icon" type="image/png" href="/assets/hexion_nobg.png">
     <meta name="description" content="Hexion.fun API Documentation">
-    <meta name="theme-color" content="#4e9af5">
+    <meta name="theme-color" content="#030304">
 
     <!-- Apply a stored colour theme before first paint (no flash). -->
     <script>
-        try {
-            var t = localStorage.getItem('hexion-theme');
-            if (t) document.documentElement.setAttribute('data-theme', t);
-        } catch (e) {}
+        var t = null;
+        try { t = localStorage.getItem('hexion-theme'); } catch (e) {}
+        /* The saved id must still exist in the switcher — anything else
+           (including a blocked localStorage) falls back to the default. */
+        document.documentElement.setAttribute('data-theme',
+            t === 'hexion' || t === 'halloween' ? t : 'hexion');
     </script>
-    <link rel="stylesheet" href="/assets/themes.css?v=20261009-2">
+    <link rel="stylesheet" href="/assets/themes.css?v=20261009-3">
 
     <style>
+        @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap");
+
+        /* Self-contained: this page does not load assets/index.css, so the
+           tokens it consumes are declared here with Hexion defaults —
+           assets/themes.css then overrides them the moment data-theme is
+           present (same pattern as get_key.html / key.html). */
         :root {
-            --bg: #0c0e13;
-            --surface: #141720;
-            --surface-hover: #1a1e2b;
-            --border: #1f2435;
-            --text: #d8dce6;
-            --muted: #5c6478;
-            --accent: #4e9af5;
-            --accent-dim: rgba(78, 154, 245, 0.1);
-            --code-bg: #0d1117;
-            --green: #34d399;
-            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+            --bg: #030304;
+            --surface: #0a0a0c;
+            --surface-2: #101014;
+            --line: rgba(255, 255, 255, .09);
+            --line-strong: rgba(255, 255, 255, .16);
+            --text: #f7f7f8;
+            --text-bright: #ffffff;
+            --muted: #8b8b93;
+            --faint: #5f6067;
+            --accent: #ffffff;
+            --accent-ink: #050505;
+            --accent-soft: rgba(255, 255, 255, .07);
+            --accent-glow: rgba(255, 255, 255, .18);
+            --secondary: #77777e;
+            --ok: #5ee39b;
+            --ok-soft: rgba(94, 227, 155, .13);
+            --font-display: "Space Grotesk", Inter, system-ui, sans-serif;
+            --font-body: Inter, system-ui, -apple-system, sans-serif;
+            --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            --nav-h: 72px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + 20px); }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background-color: var(--bg);
+            margin: 0;
+            background: var(--bg);
             color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
+            font-family: var(--font-body);
+            font-size: 15px;
+            line-height: 1.7;
             -webkit-font-smoothing: antialiased;
         }
+        ::selection { background: var(--accent); color: var(--accent-ink); }
 
-        .wrap {
-            max-width: 900px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
+        .wrap { width: min(1040px, 100% - 12vw); margin: 0 auto; }
 
-        nav {
-            padding: 20px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        nav .wrap {
+        /* ---- top bar (mirrors assets/index.css so the tab bar is identical) */
+        .nav {
+            height: var(--nav-h);
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 0 clamp(18px, 6vw, 68px);
+            border-bottom: 1px solid var(--line);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: var(--bg);
+            -webkit-backdrop-filter: blur(18px);
+            backdrop-filter: blur(18px);
         }
-
+        @supports (background: color-mix(in srgb, red 50%, transparent)) {
+            .nav { background: color-mix(in srgb, var(--bg) 76%, transparent); }
+        }
         .brand {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 18px;
-            font-weight: 700;
+            gap: 11px;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: .18em;
             color: var(--text);
             text-decoration: none;
-            transition: opacity 0.2s var(--ease-out);
+        }
+        .brand-mark {
+            width: 32px;
+            height: 32px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--line-strong);
+            border-radius: 9px;
+            overflow: hidden;
+            background: var(--accent-soft);
+            transition: .25s;
+        }
+        .brand:hover .brand-mark {
+            border-color: var(--accent);
+            transform: rotate(-7deg) scale(1.06);
+            box-shadow: 0 0 26px -8px var(--accent-glow);
+        }
+        .brand-mark img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block; }
+        .nav-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--accent-soft);
+            border: 1px solid var(--line);
+            padding: 4px;
+            border-radius: 13px;
+        }
+        .nav-tabs a {
+            color: var(--muted);
+            padding: 9px 15px;
+            border-radius: 9px;
+            font-size: 11.5px;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: .2s;
+        }
+        .nav-tabs a:hover { color: var(--text); }
+        .nav-tabs a.active {
+            background: var(--accent);
+            color: var(--accent-ink);
+            box-shadow: 0 4px 18px -8px var(--accent-glow);
+        }
+        .nav-ghost {
+            border: 1px solid var(--line-strong);
+            background: var(--accent-soft);
+            color: var(--text);
+            border-radius: 999px;
+            padding: 10px 17px;
+            font-size: 11.5px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            transition: .2s;
+        }
+        .nav-ghost:hover {
+            border-color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 26px -12px var(--accent-glow);
         }
 
-        .brand:hover { opacity: 0.8; }
-
-        .brand img { width: 28px; height: 28px; }
-
-        .nav-links {
-            display: flex;
+        /* ---- page header -------------------------------------------------- */
+        .docs-header { padding: 66px 0 6px; }
+        .docs-kicker {
+            display: inline-flex;
             align-items: center;
             gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .nav-link {
-            padding: 6px 14px;
-            font-size: 13px;
             color: var(--muted);
-            text-decoration: none;
-            border-radius: 6px;
-            transition: all 0.2s var(--ease-out);
-            white-space: nowrap;
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: .22em;
+            padding: 8px 15px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: var(--accent-soft);
+            margin-bottom: 26px;
         }
-
-        .nav-link:hover {
-            color: var(--text);
-            background: var(--surface);
-        }
-
-        .nav-link.active {
-            color: var(--text);
-            background: var(--surface);
-        }
-
-        .docs-content {
-            padding: 60px 0;
-        }
-
-        .docs-header {
-            margin-bottom: 40px;
-        }
-
         .docs-header h1 {
-            font-size: 36px;
+            margin: 0;
+            font-family: var(--font-display);
+            font-size: clamp(40px, 7vw, 74px);
+            line-height: .95;
+            letter-spacing: -.05em;
             font-weight: 700;
-            color: #fff;
-            margin-bottom: 12px;
-            line-height: 1.2;
+            color: var(--text-bright);
         }
-
+        .docs-header h1 span { color: var(--accent); }
+        @supports (-webkit-background-clip: text) {
+            .docs-header h1 span {
+                background: linear-gradient(120deg, var(--accent) 15%, var(--secondary) 130%);
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+            }
+        }
         .docs-header p {
             color: var(--muted);
-            font-size: 16px;
-            max-width: 600px;
+            max-width: 660px;
+            margin: 22px 0 0;
+            line-height: 1.75;
         }
-
-        .docs-section {
-            margin-bottom: 48px;
-        }
-
-        .docs-section h2 {
-            font-size: 24px;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 16px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .docs-section h3 {
-            font-size: 18px;
-            font-weight: 600;
+        .docs-header p code {
+            font-family: var(--font-mono);
+            font-size: .9em;
             color: var(--accent);
-            margin: 24px 0 12px;
+            background: var(--surface-2);
+            border: 1px solid var(--line);
+            padding: 2px 7px;
+            border-radius: 6px;
         }
 
-        .docs-section p {
-            color: var(--text);
-            margin-bottom: 16px;
-            line-height: 1.7;
-        }
-
-        .endpoint-box {
+        /* ---- content cards ------------------------------------------------ */
+        .docs-section {
             background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 16px 20px;
-            margin: 16px 0;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            padding: 28px;
+            margin: 18px 0 0;
+        }
+        .docs-section h2 {
+            margin: 0 0 4px;
+            font-family: var(--font-display);
+            font-size: 23px;
+            letter-spacing: -.02em;
+            color: var(--text-bright);
+        }
+        .docs-section h3 {
+            margin: 26px 0 2px;
+            font-family: var(--font-display);
+            font-size: 15.5px;
+            letter-spacing: .01em;
+            color: var(--text);
+        }
+        .docs-section p { color: var(--muted); margin: 10px 0 0; }
+        .docs-section ul { margin: 12px 0 0; padding-left: 20px; color: var(--muted); }
+        .docs-section li { margin: 8px 0; }
+        .docs-section a { color: var(--accent); text-decoration: none; font-weight: 600; }
+        .docs-section a:hover { text-decoration: underline; }
+        .docs-section > ul:first-of-type a { display: inline-block; padding: 3px 0; }
+
+        /* ---- endpoint / code --------------------------------------------- */
+        .endpoint-box {
             display: flex;
             align-items: center;
-            flex-wrap: wrap;
             gap: 12px;
-            position: relative;
+            margin-top: 16px;
+            padding: 12px 14px;
+            background: var(--surface-2);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            font-family: var(--font-mono);
+            flex-wrap: wrap;
         }
-
         .endpoint-method {
-            display: inline-block;
-            background: var(--accent);
-            color: #fff;
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-weight: 600;
-            font-size: 13px;
-            flex-shrink: 0;
+            font: 800 10px/1 var(--font-body);
+            letter-spacing: .14em;
+            color: var(--ok);
+            background: var(--ok-soft);
+            border: 1px solid var(--line-strong);
+            padding: 7px 10px;
+            border-radius: 8px;
         }
+        .endpoint-url { font-size: 13.5px; color: var(--text); overflow-wrap: anywhere; flex: 1; }
 
-        .endpoint-url {
-            font-family: 'Courier New', monospace;
-            color: var(--accent);
-            font-size: 14px;
-            word-break: break-all;
-            flex: 1;
+        .code-block, .response-example {
+            position: relative;
+            margin-top: 14px;
+            background: var(--surface-2);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            overflow: hidden;
         }
+        .code-block pre, .response-example pre {
+            margin: 0;
+            padding: 18px 20px;
+            overflow-x: auto;
+            font: 500 13px/1.65 var(--font-mono);
+            color: var(--text);
+        }
+        .code-block code, .response-example code { font: inherit; }
 
         .copy-btn {
             position: absolute;
-            top: 12px;
-            right: 12px;
-            background: var(--surface-hover);
-            border: 1px solid var(--border);
-            color: var(--muted);
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s var(--ease-out);
-            opacity: 0;
-        }
-
-        .endpoint-box .copy-btn {
-            position: relative;
-            top: auto;
-            right: auto;
-            opacity: 1;
-            flex-shrink: 0;
-        }
-
-        .code-block:hover .copy-btn, .response-example:hover .copy-btn, .endpoint-box .copy-btn:hover {
-            opacity: 1;
-        }
-
-        .copy-btn:hover {
-            background: var(--accent);
-            color: #fff;
-            border-color: var(--accent);
-        }
-
-        .copy-btn.copied {
-            background: var(--green);
-            color: #fff;
-            border-color: var(--green);
-        }
-
-        .code-block, .response-example {
-            background: var(--code-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 16px;
-            margin: 16px 0;
-            overflow-x: auto;
-            position: relative;
-        }
-
-        .response-example {
+            top: 10px;
+            right: 10px;
+            z-index: 2;
+            border: 1px solid var(--line-strong);
             background: var(--surface);
+            color: var(--muted);
+            border-radius: 999px;
+            padding: 7px 13px;
+            font: 700 11px/1 var(--font-body);
+            letter-spacing: .04em;
+            cursor: pointer;
+            opacity: 0;
+            transition: .2s;
         }
+        .code-block:hover .copy-btn, .response-example:hover .copy-btn { opacity: 1; }
+        .copy-btn:hover { color: var(--text); border-color: var(--accent); }
+        .copy-btn.copied { opacity: 1; color: var(--ok); border-color: var(--ok); }
+        .endpoint-box .copy-btn { position: static; opacity: 1; margin-left: auto; flex: none; }
 
-        .code-block pre, .response-example pre {
-            margin: 0;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            line-height: 1.6;
-            color: #e6edf3;
-            padding-right: 60px;
-            white-space: pre;
-        }
-
-        .response-example pre {
-            color: #a5d6ff;
-        }
-
+        /* ---- tables ------------------------------------------------------- */
         .table-wrapper {
             overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin: 16px 0;
-            border: 1px solid var(--border);
-            border-radius: 8px;
+            margin-top: 14px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: var(--surface-2);
         }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-            min-width: 600px;
-        }
-
-        th, td {
-            padding: 12px 16px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-
+        table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
         th {
-            background: var(--surface);
-            font-weight: 600;
-            color: #fff;
-            position: sticky;
-            top: 0;
+            text-align: left;
+            font: 800 10.5px/1 var(--font-body);
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: var(--muted);
+            padding: 15px 16px;
+            border-bottom: 1px solid var(--line);
         }
-
         td {
-            color: var(--text);
+            padding: 13px 16px;
+            border-bottom: 1px solid var(--line);
+            color: var(--muted);
+            vertical-align: top;
         }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        tr:hover {
-            background: var(--surface);
-        }
+        td:first-child { color: var(--text); font-weight: 600; }
+        tbody tr:last-child td { border-bottom: 0; }
+        tbody tr:hover td { background: var(--accent-soft); }
 
         .badge {
             display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 500;
-            white-space: nowrap;
-        }
-
-        .badge-string { background: rgba(136, 23, 113, 0.2); color: #d8b4fe; }
-        .badge-integer { background: rgba(23, 113, 100, 0.2); color: #6ee7b7; }
-        .badge-object { background: rgba(78, 154, 245, 0.2); color: #93c5fd; }
-        .badge-array { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
-
-        footer {
-            margin-top: 80px;
-            padding: 24px 0;
-            border-top: 1px solid var(--border);
-            text-align: center;
-            font-size: 12px;
+            padding: 4px 9px;
+            border-radius: 7px;
+            font: 600 11.5px/1 var(--font-mono);
+            border: 1px solid var(--line);
+            background: var(--surface);
             color: var(--muted);
         }
+        .badge-string   { color: #93c5fd; border-color: rgba(147, 197, 253, .28); background: rgba(147, 197, 253, .08); }
+        .badge-integer  { color: #fcd34d; border-color: rgba(252, 211, 77, .28);  background: rgba(252, 211, 77, .08); }
+        .badge-array    { color: #c4b5fd; border-color: rgba(196, 181, 253, .28); background: rgba(196, 181, 253, .08); }
+        .badge-object   { color: #6ee7b7; border-color: rgba(110, 231, 183, .28); background: rgba(110, 231, 183, .08); }
 
+        /* ---- callout (terms page shares this stylesheet) ------------------ */
+        .highlight-box {
+            margin-top: 14px;
+            padding: 16px 18px;
+            border: 1px solid var(--line-strong);
+            border-left: 3px solid var(--accent);
+            border-radius: 12px;
+            background: var(--accent-soft);
+            color: var(--text);
+            font-size: 14px;
+        }
+        .highlight-box strong { color: var(--accent); }
+
+        /* ---- footer ------------------------------------------------------- */
+        footer {
+            border-top: 1px solid var(--line);
+            margin-top: 48px;
+            padding: 24px 0 34px;
+            color: var(--muted);
+            font-size: 12.5px;
+        }
+        footer .wrap {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        footer a { color: var(--muted); text-decoration: none; font-weight: 600; }
+        footer a:hover { color: var(--text); }
+
+        /* ---- responsive --------------------------------------------------- */
+        @media (max-width: 900px) {
+            .docs-section { padding: 22px; }
+        }
         @media (max-width: 640px) {
-            .wrap { padding: 0 16px; }
-            .docs-content { padding: 40px 0; }
-            .docs-header h1 { font-size: 28px; }
-            .docs-header p { font-size: 15px; }
-            .docs-section h2 { font-size: 20px; }
-            .docs-section h3 { font-size: 16px; }
-            .endpoint-box { padding: 12px 16px; }
-            .code-block pre, .response-example pre { font-size: 12px; padding-right: 0; }
-            .copy-btn { opacity: 1; position: relative; top: auto; right: auto; margin-top: 8px; display: block; width: 100%; text-align: center; }
-            .endpoint-box .copy-btn { width: auto; margin-top: 0; }
-            table { font-size: 13px; }
-            th, td { padding: 10px 12px; }
+            :root { --nav-h: 64px; }
+            .nav { padding: 0 14px; gap: 8px; }
+            .brand { gap: 8px; }
+            .brand > span:last-child { display: none; }   /* wordmark: logo stays */
+            .nav-tabs { gap: 2px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+            .nav-tabs::-webkit-scrollbar { display: none; }
+            .nav-tabs a { padding: 8px 9px; font-size: 11px; }
+            .nav-ghost-cta { display: none; }   /* hero CTA covers it on phones */
+            .docs-header { padding-top: 44px; }
+            .docs-section { padding: 18px 16px; border-radius: 16px; }
+            /* Touch has no hover, so the copy buttons stand in normal flow. */
+            .copy-btn { opacity: 1; position: static; display: block; width: 100%; text-align: center; }
+            .endpoint-box .copy-btn { width: auto; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .01ms !important;
+                transition-duration: .01ms !important;
+            }
         }
     </style>
 </head>
 <body>
 
-<nav>
-    <div class="wrap">
-        <a href="index.html" class="brand">
-            <img src="/assets/hexion.png" alt="Hexion.fun" onerror="this.style.display='none'">
-            Hexion.fun
-        </a>
-        <div class="nav-links">
-            <a href="../home" class="nav-link">Home</a>
-            <a href="../docs" class="nav-link">API Docs</a>
-            <a href="https://discord.gg/beM4pRtBdG" target="_blank" class="nav-link">Discord</a>
-        </div>
+<nav class="nav">
+    <a class="brand" href="/">
+        <span class="brand-mark"><img src="/assets/hexion.png" alt="" onerror="this.style.display='none'"></span>
+        <span>HEXION.FUN</span>
+    </a>
+    <div class="nav-tabs">
+        <a href="/">Home</a>
+        <a href="/#status">Status</a>
+        <a href="/docs/?key=hexion" class="active">API Docs</a>
+        <a href="/tos/?key=hexion">Terms</a>
     </div>
+    <a class="nav-ghost nav-ghost-cta" href="/">Get Hexion.fun</a>
 </nav>
 
 <div class="wrap">
-    <div class="docs-content">
+    <main class="docs-content">
         <div class="docs-header">
-            <h1>API Documentation</h1>
-            <p>The public Hexion.fun API is unauthenticated and rate-limited per IP. All responses are JSON. The base URL is <code style="background: var(--surface); padding: 2px 6px; border-radius: 4px; color: var(--accent);">/</code></p>
+            <span class="docs-kicker">HEXION.FUN &middot; DEVELOPERS</span>
+            <h1>API <span>Documentation</span></h1>
+            <p>The public Hexion.fun API is unauthenticated and rate-limited per IP. All responses are JSON. The base URL is <code>/</code></p>
         </div>
 
         <div class="docs-section">
@@ -557,11 +622,14 @@ console.log(data);</code></pre>
             <p>Need an endpoint that is not listed here? Open an issue on Discord.</p>
             <a href="https://discord.gg/beM4pRtBdG" target="_blank" class="nav-link" style="display: inline-block; margin-top: 8px;">Join our Discord</a>
         </div>
-    </div>
+    </main>
 </div>
 
 <footer>
-    <div class="wrap">Hexion.fun 2026 V1 &middot; All rights reserved</div>
+    <div class="wrap">
+        <span>&copy; 2026 Hexion.fun &mdash; your scripts, your space.</span>
+        <a href="#">Back to top &uarr;</a>
+    </div>
 </footer>
 
 <script>
@@ -579,20 +647,38 @@ console.log(data);</code></pre>
             }
 
             if (textToCopy) {
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    const originalText = btn.innerText;
+                var showCopied = function () {
+                    var originalText = btn.innerText;
                     btn.innerText = 'Copied!';
                     btn.classList.add('copied');
-                    setTimeout(() => {
+                    setTimeout(function () {
                         btn.innerText = originalText;
                         btn.classList.remove('copied');
                     }, 2000);
-                });
+                };
+                var fallbackCopy = function () {
+                    /* Clipboard API refused (permissions, http://, older
+                       browser): fall back to the classic path so the button
+                       never claims a copy that did not happen. */
+                    var ta = document.createElement('textarea');
+                    ta.value = textToCopy;
+                    ta.style.position = 'fixed';
+                    ta.style.opacity = '0';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    try { if (document.execCommand('copy')) showCopied(); } catch (e) {}
+                    document.body.removeChild(ta);
+                };
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(textToCopy).then(showCopied, fallbackCopy);
+                } else {
+                    fallbackCopy();
+                }
             }
         });
     });
 </script>
 
-    <script src="/assets/theme.js?v=20261009-2"></script>
+    <script src="/assets/theme.js?v=20261009-3"></script>
 </body>
 </html>

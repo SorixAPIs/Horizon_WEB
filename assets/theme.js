@@ -11,6 +11,8 @@
      2. apply + persist the chosen theme, update <meta name="theme-color">
      3. render the floating switcher (bottom-right)
      4. follow changes made in another tab via the `storage` event
+     5. validate the saved id on every load — anything no longer in the list
+        is discarded and the default (Hexion) takes over
 
    The pre-paint inline script in each <head> already applies a stored theme
    before first paint, so this file never causes a flash — worst case here is
@@ -21,25 +23,36 @@
   'use strict';
 
   var KEY = 'hexion-theme';
+  var DEFAULT_ID = 'hexion';
 
   /* id must match :root[data-theme="…"] in themes.css; dot drives the swatch. */
   var THEMES = [
-    { id: 'hexion',   label: 'Hexion',   dot: '#f7f7f8', meta: '#030304' },
-    { id: 'aurora',   label: 'Aurora',   dot: '#5eead4', meta: '#04070b' },
-    { id: 'violet',   label: 'Violet',   dot: '#a78bfa', meta: '#07050d' },
-    { id: 'ember',    label: 'Ember',    dot: '#fb923c', meta: '#0a0604' },
-    { id: 'crimson',  label: 'Crimson',  dot: '#ff4d6d', meta: '#090406' },
-    { id: 'daylight', label: 'Daylight', dot: '#2563eb', meta: '#f6f7f9' }
+    { id: 'hexion',    label: 'Hexion',    dot: '#f7f7f8', meta: '#030304' },
+    { id: 'halloween', label: 'Halloween', dot: '#ff7a1a', meta: '#0a0609' }
   ];
 
+  function available(id) {
+    for (var i = 0; i < THEMES.length; i++) {
+      if (THEMES[i].id === id) return true;
+    }
+    return false;
+  }
+
+  /* Always resolve to a theme that actually exists. A saved id from an older
+     build (or a hand-edited localStorage) is dropped here, and a page with no
+     attribute yet falls back to the default — never to "nothing applies". */
   function current() {
-    try {
-      var saved = localStorage.getItem(KEY);
-      for (var i = 0; i < THEMES.length; i++) {
-        if (THEMES[i].id === saved) return saved;
-      }
-    } catch (e) { /* private mode etc. */ }
-    return null;   // no attribute: the page's own :root colours stand
+    var saved = null;
+    try { saved = localStorage.getItem(KEY); } catch (e) { /* private mode */ }
+
+    if (saved && available(saved)) return saved;
+    if (saved !== null) {
+      try { localStorage.removeItem(KEY); } catch (e) { /* storage blocked */ }
+    }
+
+    var applied = document.documentElement.getAttribute('data-theme');
+    if (available(applied)) return applied;
+    return DEFAULT_ID;
   }
 
   function set(id, persist) {
@@ -187,23 +200,19 @@
 
     paint();
 
-    /* The pre-paint script in <head> applies a stored theme but knows nothing
-       about the meta tag, so the browser chrome would keep the authored
-       colour (#030304) until the visitor changed theme by hand. Re-derive it
-       from whatever attribute actually landed. persist=false: the value is
-       already in localStorage, re-writing it would be pointless. */
-    var applied = document.documentElement.getAttribute('data-theme');
-    if (applied) set(applied, false);
+    /* Re-resolve through current(): whatever the pre-paint snippet applied is
+       validated against the live theme list, an id that no longer exists is
+       dropped from localStorage, and the result (default included) is written
+       back so <meta name="theme-color"> always matches what is on screen. */
+    set(current());
   }
 
-  /* Another tab switched the theme: follow it live. */
+  /* Another tab switched the theme: follow it live. Re-validated here too, so
+     a hand-edited value written by another tab cannot slip through. */
   window.addEventListener('storage', function (e) {
     if (e.key !== KEY) return;
-    var id = null;
-    for (var i = 0; i < THEMES.length; i++) {
-      if (THEMES[i].id === e.newValue) id = e.newValue;
-    }
-    if (id) set(id, false);
+    if (e.newValue !== null && !available(e.newValue)) return;
+    set(current(), false);
   });
 
   if (document.readyState === 'loading') {

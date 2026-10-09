@@ -135,7 +135,10 @@ button { color: inherit; }
   padding: 4px;
   border-radius: 13px;
 }
-.nav-tabs button {
+/* Tabs are <button> inside the SPA and <a> when they leave it (API Docs,
+   Terms) — visually identical so the bar never changes shape between pages. */
+.nav-tabs button,
+.nav-tabs a {
   border: 0;
   background: transparent;
   color: var(--muted);
@@ -146,9 +149,13 @@ button { color: inherit; }
   letter-spacing: .04em;
   cursor: pointer;
   transition: .2s;
+  text-decoration: none;
+  white-space: nowrap;
 }
-.nav-tabs button:hover { color: var(--text); }
-.nav-tabs button.active {
+.nav-tabs button:hover,
+.nav-tabs a:hover { color: var(--text); }
+.nav-tabs button.active,
+.nav-tabs a.active {
   background: var(--accent);
   color: var(--accent-ink);
   box-shadow: 0 4px 18px -8px var(--accent-glow);
@@ -700,7 +707,7 @@ button { color: inherit; }
 }
 .coming-badge, .err-path {
   font: 600 11px var(--font-mono);
-  color: var(--faint);
+  color: var(--muted);
   word-break: break-all;
   border: 1px solid var(--line);
   background: var(--surface);
@@ -717,7 +724,7 @@ footer {
   align-items: center;
   gap: 14px;
   flex-wrap: wrap;
-  color: var(--faint);
+  color: var(--muted);
   font-size: 11px;
 }
 footer span { line-height: 1.6; }
@@ -760,14 +767,49 @@ footer button:hover { color: var(--text); }
   .nav { padding: 0 14px; gap: 8px; }
   .brand { gap: 8px; }
   .brand > span:last-child { display: none; }   /* wordmark: logo stays */
-  .nav-tabs { gap: 2px; }
-  .nav-tabs button { padding: 8px 10px; font-size: 11px; }
+  .nav-tabs { gap: 2px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .nav-tabs button, .nav-tabs a { padding: 8px 9px; font-size: 11px; }
+  /* Four tabs no longer fit beside the CTA on a phone. The hero keeps its own
+     full-width download button, so the nav one steps aside here — error pages
+     carry a plain .nav-ghost (their only way back) and stay visible. What is
+     left of the tab strip scrolls sideways rather than spilling the bar. */
+  .nav-ghost-cta { display: none; }
   .nav-ghost { padding: 9px 13px; font-size: 11px; }
   .actions .btn { width: 100%; }
   .features { padding: 70px 6vw; }
   .status-page, .coming-page { padding: 70px 6vw 110px; }
   .download-modal { padding: 28px 22px; }
   footer { flex-direction: column; text-align: center; }
+}
+
+/* ---- halloween flourishes -------------------------------------------------
+   The palette itself lives in themes.css (colour tokens only). These are the
+   decorations that go with it: a bat swarm drifting over the hero. Keyed on
+   the attribute so the default theme never pays for them, and cheap enough
+   that [prefers-reduced-motion] above already parks them. */
+[data-theme="halloween"] .hero::after {
+  content: "🦇  🦇  🦇";
+  position: absolute;
+  top: 92px;
+  right: 6vw;
+  z-index: 1;
+  font-size: clamp(15px, 2vw, 23px);
+  letter-spacing: 12px;
+  opacity: .72;
+  transform: rotate(-9deg);
+  pointer-events: none;
+  text-shadow: 0 0 18px rgba(255, 122, 26, .55);
+  animation: bat-drift 6.5s ease-in-out infinite alternate;
+}
+@keyframes bat-drift {
+  from { transform: rotate(-9deg) translateY(0); }
+  to   { transform: rotate(-5deg) translateY(-11px); }
+}
+/* The outlined ghost numeral on the error pages takes the pumpkin tint too
+   (stroke only — the fill stays transparent so it keeps its outline look). */
+[data-theme="halloween"] .err-ghost {
+  -webkit-text-stroke-color: rgba(255, 122, 26, .45);
 }
 
 @media (prefers-reduced-motion: reduce) {

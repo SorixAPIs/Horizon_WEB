@@ -28,14 +28,15 @@ Middleware, and only powers the two key-system endpoints (see below).
 │   └── fetch/
 │       └── index.html  /API/fetch/ (directory form)
 ├── downloads/          Client builds (.zip) go here
-├── beta/  docs/  tos/  home/    Hidden pages (see below)
+├── beta/  docs/  tos/  home/    Gated pages (see below — docs & terms also open from the nav tabs)
 └── Logo.png            Unused legacy asset
 ```
 
 ## Themes
 
-The site ships with **six colour themes**: Hexion (default monochrome),
-Aurora (teal), Violet, Ember, Crimson, and Daylight (light).
+The site ships with **two colour themes**: **Hexion** (the default — warm
+monochrome) and **Halloween** (pumpkin orange + purple on a warm near-black,
+with a bat swarm drifting over the hero).
 
 - `assets/themes.css` — one `:root[data-theme="…"]` block per theme. Each block
   only defines colour tokens (`--bg`, `--accent`, `--line`, …); layout lives in
@@ -43,18 +44,29 @@ Aurora (teal), Violet, Ember, Crimson, and Daylight (light).
   The selector is `:root[data-theme]` (specificity 0,2,0) rather than
   `html[data-theme]` (0,1,0) on purpose: a tie with the pages' own `:root`
   defaults would be decided by link order, and `themes.css` loads first.
+  Halloween's *decorations* (the bats over the hero, the pumpkin tint on the
+  error-page ghost numeral) live in `assets/index.css` under
+  `[data-theme="halloween"]`, so this file stays a pure palette.
 - `assets/theme.js` — renders the floating switcher (bottom-right), persists
   the choice in `localStorage` under `hexion-theme`, keeps
   `<meta name="theme-color">` in sync, and follows changes from other tabs.
+  It also **validates the saved id on every load**: an id that is no longer in
+  its `THEMES` list (an older build's save, a hand-edited localStorage, blocked
+  storage) is discarded and Hexion takes over — a stale save can never leave a
+  page half-themed.
 - Each `<head>` runs a tiny inline script **before first paint** that
-  re-applies the stored theme, so there is no flash of the wrong palette. It is
-  duplicated on every page on purpose: an external file could not guarantee it
-  runs before the first paint.
+  re-applies the stored theme, so there is no flash of the wrong palette. It
+  whitelists the same two ids and defaults to `hexion`; it is duplicated on
+  every page on purpose, because an external file could not guarantee it runs
+  before the first paint.
 
-Until a visitor picks a theme, no `data-theme` attribute exists and every page
-shows its authored `:root` colours (the hidden pages keep their own palettes).
-`:root[data-theme=…]` outranks plain `:root`, so the moment a choice is made
-the hidden pages re-skin too.
+A `data-theme` attribute therefore always exists: with nothing saved the
+pre-paint script writes `hexion`, so every page — the hidden ones included —
+shows the default palette until the visitor picks another theme.
+
+**Adding or renaming a theme touches the whole chain**: the block in
+`themes.css`, `THEMES` in `theme.js` (id, label, swatch, meta colour), the id
+whitelist in all nine inline pre-paint scripts, and the `?v=` stamps.
 
 The raw `/API/fetch` views deliberately stay out: they mimic a bare JSON
 response and are meant to look like one.
@@ -71,9 +83,10 @@ default), then bump the `?v=` stamps — see Asset caching below.
 | `/get_key/v=1` | Starts the two-checkpoint key flow |
 | `/404` | Served automatically for any unknown URL |
 | `/500` | Server-error page (served where the host honours one) |
-| `/beta`, `/docs`, `/tos`, `/home` | Hidden — redirect away unless `?key=hexion` is present |
+| `/docs`, `/tos` | Linked from the nav tabs (**API Docs**, **Terms**); the `?key=hexion` gate still guards direct hits |
+| `/beta`, `/home` | Hidden — redirect away unless `?key=hexion` is present |
 
-Hidden pages are only *lightly* hidden: on a static host the HTML is still downloadable if someone guesses the URL.
+`/beta` and `/home` are only *lightly* hidden: on a static host the HTML is still downloadable if someone guesses the URL. `/docs` and `/tos` share that gate but are now reachable by clicking the tabs — their links carry `?key=hexion`, so the bounce never fires for a visitor coming from the site (and a URL copied out of the address bar keeps working in a fresh tab).
 
 Every page above except the raw `/API/fetch` view carries the floating theme switcher, so the choice made on one page follows the visitor to all the others (one `localStorage` key, shared origin).
 
@@ -353,7 +366,7 @@ Measured on the live host:
 
 The difference is Cloudflare, not this repo: Cloudflare caches `.js`/`.css` and then stamps its own **Browser Cache TTL** (default 4 hours) onto the response, while HTML passes through with the origin's value. `vercel.json` sets the origin side to `max-age=0, must-revalidate`, which is the correct declaration and takes effect as soon as the zone's Browser Cache TTL is set to *Respect Origin* — but with the default it never reaches the browser.
 
-**So a push to JS/CSS can stay invisible for up to four hours.** The reliable bypass is the `?v=` query string on the `<script>`/`<link>` tags in `index.html`, `404.html`, `500.html`, `get_key.html`, `key.html`, `API/fetch.html`, `API/fetch/index.html` and the four hidden pages: a new query string is a new cache entry, so it ignores whatever the browser is still holding. Change the current token (now `20261009-2`) to any new value — it is only ever compared for inequality. **Bump it every time `assets/*.js`, `assets/*.css` or `API/fetch.js` change**, otherwise anyone who loaded the page before the push keeps running the old file for up to four hours. That is not theoretical: the `/cdn/` download route shipped while the stamp still read `20261007-1`, so early visitors went on opening the raw `http://…:24617` link in a blank tab and reported the download as broken. The theme wiring (`assets/themes.css`, `assets/theme.js`) is stamped the same way — bump it when either changes so a palette fix reaches everyone immediately.
+**So a push to JS/CSS can stay invisible for up to four hours.** The reliable bypass is the `?v=` query string on the `<script>`/`<link>` tags in `index.html`, `404.html`, `500.html`, `get_key.html`, `key.html`, `API/fetch.html`, `API/fetch/index.html` and the four hidden pages: a new query string is a new cache entry, so it ignores whatever the browser is still holding. Change the current token (now `20261009-3`) to any new value — it is only ever compared for inequality. **Bump it every time `assets/*.js`, `assets/*.css` or `API/fetch.js` change**, otherwise anyone who loaded the page before the push keeps running the old file for up to four hours. That is not theoretical: the `/cdn/` download route shipped while the stamp still read `20261007-1`, so early visitors went on opening the raw `http://…:24617` link in a blank tab and reported the download as broken. The theme wiring (`assets/themes.css`, `assets/theme.js`) is stamped the same way — bump it when either changes so a palette fix reaches everyone immediately.
 
 ## Notes
 

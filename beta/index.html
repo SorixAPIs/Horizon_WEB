@@ -46,12 +46,14 @@
 
     <!-- Apply a stored colour theme before first paint (no flash). -->
     <script>
-        try {
-            var t = localStorage.getItem('hexion-theme');
-            if (t) document.documentElement.setAttribute('data-theme', t);
-        } catch (e) {}
+        var t = null;
+        try { t = localStorage.getItem('hexion-theme'); } catch (e) {}
+        /* The saved id must still exist in the switcher — anything else
+           (including a blocked localStorage) falls back to the default. */
+        document.documentElement.setAttribute('data-theme',
+            t === 'hexion' || t === 'halloween' ? t : 'hexion');
     </script>
-    <link rel="stylesheet" href="/assets/themes.css?v=20261009-2">
+    <link rel="stylesheet" href="/assets/themes.css?v=20261009-3">
 
     <style>
         /* ===== DESIGN TOKENS ===== */
@@ -1381,7 +1383,7 @@
         setInterval(loadEndpoint, 30000);
     </script>
 
-    <script src="/assets/theme.js?v=20261009-2"></script>
+    <script src="/assets/theme.js?v=20261009-3"></script>
 </body>
 
 </html>
