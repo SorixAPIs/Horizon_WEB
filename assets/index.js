@@ -1,7 +1,11 @@
 /* ============================================================================
    HEXION.FUN — site source
-   Rebuilt from the production bundle (Home + Status).
+   Rebuilt from the production bundle (Home + Status), then redesigned.
    No framework, no build step: edit, save, refresh.
+
+   All logic below is unchanged in behaviour: state, Status polling, download
+   pre-check, Roblox version check, event delegation, page hardening. Only the
+   markup strings and class names track the new design in assets/index.css.
    ========================================================================== */
 
 'use strict';
@@ -30,7 +34,9 @@ const ICONS = {
     '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>' +
     '<path d="M21 3v5h-5"/>' +
     '<path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>' +
-    '<path d="M8 16H3v5"/>'
+    '<path d="M8 16H3v5"/>',
+  shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
+  zap: '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>'
 };
 
 function icon(name, size, cls) {
@@ -116,8 +122,9 @@ const state = {
 /* ---------------------------------------------------------------------------
    Partials
    ------------------------------------------------------------------------- */
-function statusPill(online, label) {
-  return '<span class="status-pill ' + (online ? 'online' : 'offline') + '">' +
+function statusPill(online, label, mode) {
+  const kind = mode || (online ? 'online' : 'offline');
+  return '<span class="status-pill ' + kind + '">' +
          '<span class="status-dot"></span> ' + label + '</span>';
 }
 
@@ -172,14 +179,14 @@ function deriveBuildStatus(data, reachable) {
 }
 
 function buildPill(build) {
-  if (build.online === null) return statusPill(false, 'CHECKING...');
+  if (build.online === null) return statusPill(false, 'CHECKING…', 'checking');
   return statusPill(build.online, build.online ? 'ONLINE' : 'OFFLINE');
 }
 
 function buildVersions(build) {
   if (build.online === null) {
     return '<div class="build-versions"><div class="build-line">' +
-           '<strong>checking…</strong></div></div>';
+           '<span>latest</span><strong>checking…</strong></div></div>';
   }
 
   const row = (label, value) =>
@@ -295,6 +302,9 @@ function nav() {
 }
 
 function homePage() {
+  const chip = (value, label) =>
+    '<li><strong>' + value + '</strong> ' + label + '</li>';
+
   return (
     '<section id="home" class="hero">' +
       '<div class="orb orb-one"></div>' +
@@ -313,20 +323,35 @@ function homePage() {
             ' target="_blank" rel="noopener noreferrer">' +
             icon('message', 18) + ' Discord</a>' +
         '</div>' +
-        '<div class="microcopy"><span class="status-dot"></span>' +
-          ' Lightweight interface &nbsp;&middot;&nbsp; Smooth workflow</div>' +
+        '<ul class="hero-strip">' +
+          chip('2', 'builds tracked') +
+          chip('10s', 'status refresh') +
+          chip('24h', 'key lifetime') +
+        '</ul>' +
       '</div>' +
     '</section>' +
 
     '<section class="features">' +
-      '<div class="section-label">HEXION.FUN</div>' +
+      '<div class="section-head">' +
+        '<div class="section-label">WHY HEXION.FUN</div>' +
+        '<h2 class="section-title">The essentials, nothing extra.</h2>' +
+      '</div>' +
       '<div class="feature-grid">' +
-        '<article><strong>01</strong><h2>Clean</h2>' +
-          '<p>No clutter. Every control has a purpose.</p></article>' +
-        '<article><strong>02</strong><h2>Status</h2>' +
-          '<p>Internal and external availability shown separately.</p></article>' +
-        '<article><strong>03</strong><h2>Keyless</h2>' +
-          '<p>No keys, no waiting. Grab the client and go.</p></article>' +
+        '<article>' +
+          '<div class="feature-icon">' + icon('zap', 18) + '</div>' +
+          '<strong>01</strong><h2>Clean</h2>' +
+          '<p>No clutter. Every control has a purpose.</p>' +
+        '</article>' +
+        '<article>' +
+          '<div class="feature-icon">' + icon('activity', 18) + '</div>' +
+          '<strong>02</strong><h2>Status</h2>' +
+          '<p>Internal and external availability shown separately, refreshed live.</p>' +
+        '</article>' +
+        '<article>' +
+          '<div class="feature-icon">' + icon('shield', 18) + '</div>' +
+          '<strong>03</strong><h2>Keyless</h2>' +
+          '<p>No keys, no waiting. Grab the client and go.</p>' +
+        '</article>' +
       '</div>' +
     '</section>'
   );
@@ -431,7 +456,7 @@ function downloadModal() {
 function footer() {
   return (
     '<footer id="discord">' +
-      '<span>&copy; 2026 Hexion.fun</span>' +
+      '<span>&copy; 2026 Hexion.fun &mdash; your scripts, your space.</span>' +
       '<button data-action="to-top">Back to top &uarr;</button>' +
     '</footer>'
   );
@@ -452,6 +477,15 @@ function render() {
     '</main>';
 }
 
+/* Keep the URL in step with the view. replaceState (not pushState): switching
+   tabs should not fill the back button with entries that mirror the nav bar,
+   and it never fires hashchange, so the listener below cannot loop. */
+function syncHash() {
+  const want = state.page === 'status' ? '#status' : '';
+  if ((location.hash || '') === want) return;
+  history.replaceState(null, '', location.pathname + location.search + want);
+}
+
 function setPage(page) {
   if (state.page === page) return;
   const previous = state.page;
@@ -462,6 +496,7 @@ function setPage(page) {
   if (previous === 'status') stopBuildPollers();
 
   render();
+  syncHash();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
   if (page === 'status') {
@@ -469,6 +504,12 @@ function setPage(page) {
     startBuildPollers();
   }
 }
+
+/* Deep links: the error pages promise /#status opens the Status view, and a
+   shared/bookmarked #status URL should honour that on its own. */
+window.addEventListener('hashchange', function () {
+  setPage(location.hash === '#status' ? 'status' : 'home');
+});
 
 /* ---------------------------------------------------------------------------
    Roblox client version check
@@ -662,3 +703,7 @@ document.addEventListener('copy', function (e) {
    Boot
    ------------------------------------------------------------------------- */
 render();
+
+/* Arriving on /#status (from an error page, a bookmark or a shared link)
+   opens Status directly instead of parking the visitor on Home. */
+if (location.hash === '#status') setPage('status');

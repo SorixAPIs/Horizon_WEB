@@ -23,6 +23,16 @@
     <link rel="icon" type="image/png" href="/assets/hexion_nobg.png">
     <meta name="description" content="Hexion.fun Terms of Service">
     <meta name="theme-color" content="#4e9af5">
+
+    <!-- Apply a stored colour theme before first paint (no flash). -->
+    <script>
+        try {
+            var t = localStorage.getItem('hexion-theme');
+            if (t) document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="/assets/themes.css?v=20261009-2">
+
     <style>
         :root {
             --bg: #0c0e13;
@@ -268,5 +278,6 @@
     <div class="wrap">Hexion.fun 2026 V1 &middot; All rights reserved</div>
 </footer>
 
+    <script src="/assets/theme.js?v=20261009-2"></script>
 </body>
 </html>

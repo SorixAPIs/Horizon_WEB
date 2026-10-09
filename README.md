@@ -10,12 +10,15 @@ Middleware, and only powers the two key-system endpoints (see below).
 /
 ├── index.html          Home + Status (single page, two views)
 ├── 404.html            Custom "page not found" (used by Netlify / GitHub Pages / Cloudflare Pages)
+├── 500.html            Custom "server error" (served where the host honours it)
 ├── get_key.html        Key flow — entry, /get_key/v=1
 ├── key.html            Key flow — checkpoint callbacks + the key page
 ├── middleware.js       /key/verify/* and /api/key/issue (Vercel only)
 ├── package.json        Exists only so middleware.js is treated as an ES module
 ├── assets/
-│   ├── index.css       Stylesheet
+│   ├── index.css       Layout stylesheet (colours come from themes.css)
+│   ├── themes.css      Colour themes — one block per palette (see below)
+│   ├── theme.js        Theme switcher widget + persistence
 │   ├── index.js        All site logic (nav, Status page, download modal, polling)
 │   ├── hexion.png      Hexion.fun logo (nav + social cards, local fallback)
 │   └── hexion_nobg.png Hexion.fun icon (tab / apple-touch, transparent)
@@ -29,6 +32,36 @@ Middleware, and only powers the two key-system endpoints (see below).
 └── Logo.png            Unused legacy asset
 ```
 
+## Themes
+
+The site ships with **six colour themes**: Hexion (default monochrome),
+Aurora (teal), Violet, Ember, Crimson, and Daylight (light).
+
+- `assets/themes.css` — one `:root[data-theme="…"]` block per theme. Each block
+  only defines colour tokens (`--bg`, `--accent`, `--line`, …); layout lives in
+  `assets/index.css`. A page therefore re-skins by changing one attribute.
+  The selector is `:root[data-theme]` (specificity 0,2,0) rather than
+  `html[data-theme]` (0,1,0) on purpose: a tie with the pages' own `:root`
+  defaults would be decided by link order, and `themes.css` loads first.
+- `assets/theme.js` — renders the floating switcher (bottom-right), persists
+  the choice in `localStorage` under `hexion-theme`, keeps
+  `<meta name="theme-color">` in sync, and follows changes from other tabs.
+- Each `<head>` runs a tiny inline script **before first paint** that
+  re-applies the stored theme, so there is no flash of the wrong palette. It is
+  duplicated on every page on purpose: an external file could not guarantee it
+  runs before the first paint.
+
+Until a visitor picks a theme, no `data-theme` attribute exists and every page
+shows its authored `:root` colours (the hidden pages keep their own palettes).
+`:root[data-theme=…]` outranks plain `:root`, so the moment a choice is made
+the hidden pages re-skin too.
+
+The raw `/API/fetch` views deliberately stay out: they mimic a bare JSON
+response and are meant to look like one.
+
+**When changing any colour**, edit every block in `themes.css` (not just the
+default), then bump the `?v=` stamps — see Asset caching below.
+
 ## Pages
 
 | Path | What it is |
@@ -37,9 +70,12 @@ Middleware, and only powers the two key-system endpoints (see below).
 | `/API/fetch` | Live JSON for both builds — polled every 10 s |
 | `/get_key/v=1` | Starts the two-checkpoint key flow |
 | `/404` | Served automatically for any unknown URL |
+| `/500` | Server-error page (served where the host honours one) |
 | `/beta`, `/docs`, `/tos`, `/home` | Hidden — redirect away unless `?key=hexion` is present |
 
 Hidden pages are only *lightly* hidden: on a static host the HTML is still downloadable if someone guesses the URL.
+
+Every page above except the raw `/API/fetch` view carries the floating theme switcher, so the choice made on one page follows the visitor to all the others (one `localStorage` key, shared origin).
 
 ## `/API/fetch`
 
@@ -289,7 +325,7 @@ Then open `http://localhost:3000` (or `:8000`).
 
 ## Deployment
 
-Any static host works. For the custom 404, the host must look for `404.html` at the site root (Netlify, GitHub Pages, Vercel and Cloudflare Pages all do).
+Any static host works. For the custom 404, the host must look for `404.html` at the site root (Netlify, GitHub Pages, Vercel and Cloudflare Pages all do). `500.html` follows the same idea but is **host-dependent**: a host that only ever serves a custom 404 (Vercel, GitHub Pages) will never reach it, so treat it as the error document for hosts that let you map one — the page itself is finished either way.
 
 The live site is **[gethexion.kdns.fr](https://gethexion.kdns.fr/)** (Vercel). Two config files are shipped so every passthrough below works on either major host — **the upstream one is required for the site to reach the API from `https://`**, since mixed content blocks a direct call:
 
@@ -317,7 +353,7 @@ Measured on the live host:
 
 The difference is Cloudflare, not this repo: Cloudflare caches `.js`/`.css` and then stamps its own **Browser Cache TTL** (default 4 hours) onto the response, while HTML passes through with the origin's value. `vercel.json` sets the origin side to `max-age=0, must-revalidate`, which is the correct declaration and takes effect as soon as the zone's Browser Cache TTL is set to *Respect Origin* — but with the default it never reaches the browser.
 
-**So a push to JS/CSS can stay invisible for up to four hours.** The reliable bypass is the `?v=` query string on the `<script>`/`<link>` tags in `index.html`, `API/fetch.html` and `API/fetch/index.html`: a new query string is a new cache entry, so it ignores whatever the browser is still holding. Change the current token (now `20261009-1`) to any new value — it is only ever compared for inequality. **Bump it every time `assets/*.js`, `assets/*.css` or `API/fetch.js` change**, otherwise anyone who loaded the page before the push keeps running the old file for up to four hours. That is not theoretical: the `/cdn/` download route shipped while the stamp still read `20261007-1`, so early visitors went on opening the raw `http://…:24617` link in a blank tab and reported the download as broken.
+**So a push to JS/CSS can stay invisible for up to four hours.** The reliable bypass is the `?v=` query string on the `<script>`/`<link>` tags in `index.html`, `404.html`, `500.html`, `get_key.html`, `key.html`, `API/fetch.html`, `API/fetch/index.html` and the four hidden pages: a new query string is a new cache entry, so it ignores whatever the browser is still holding. Change the current token (now `20261009-2`) to any new value — it is only ever compared for inequality. **Bump it every time `assets/*.js`, `assets/*.css` or `API/fetch.js` change**, otherwise anyone who loaded the page before the push keeps running the old file for up to four hours. That is not theoretical: the `/cdn/` download route shipped while the stamp still read `20261007-1`, so early visitors went on opening the raw `http://…:24617` link in a blank tab and reported the download as broken. The theme wiring (`assets/themes.css`, `assets/theme.js`) is stamped the same way — bump it when either changes so a palette fix reaches everyone immediately.
 
 ## Notes
 

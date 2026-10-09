@@ -6,10 +6,9 @@
     <meta name="theme-color" content="#030304">
     <meta name="robots" content="noindex,nofollow">
 
-    <title>Hexion.fun — 404, page not found</title>
+    <title>Hexion.fun — 500, something broke</title>
 
-    <!-- Absolute paths on purpose: this file is served for ANY unknown URL
-         (/anything/at/all), so relative asset links would break on deep paths. -->
+    <!-- Absolute paths on purpose: an error page can be served for any URL. -->
     <link rel="icon" type="image/png" href="/assets/hexion_nobg.png">
     <link rel="apple-touch-icon" href="/assets/hexion_nobg.png">
 
@@ -29,64 +28,46 @@
     <div class="page">
         <nav class="nav">
             <a class="brand" href="/">
-                <span class="brand-mark">
-                    <!-- The bundled copy is byte-identical to the CDN original
-                         (verified by SHA-256), so the error page renders from
-                         disk alone: no http:// request that an https:// host
-                         would reject as mixed content before falling back. -->
-                    <img src="/assets/hexion.png" alt="">
-                </span>
+                <span class="brand-mark"><img src="/assets/hexion.png" alt=""></span>
                 <span>HEXION.FUN</span>
             </a>
             <a class="nav-ghost" href="/">Back to Hexion.fun</a>
         </nav>
 
         <section class="coming-page">
-            <span class="err-ghost" aria-hidden="true">404</span>
+            <span class="err-ghost" aria-hidden="true">500</span>
 
             <div class="coming-icon">
-                <!-- lucide: search-x -->
+                <!-- lucide: server-crash -->
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
                      stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.3-4.3"></path>
-                    <path d="m9 9 6 6"></path>
-                    <path d="m15 9-6 6"></path>
+                    <rect width="20" height="8" x="2" y="2" rx="2" ry="2"></rect>
+                    <rect width="20" height="8" x="2" y="14" rx="2" ry="2"></rect>
+                    <path d="M6 6h.01"></path>
+                    <path d="M6 18h.01"></path>
                 </svg>
             </div>
 
-            <div class="page-kicker">ERROR 404</div>
+            <div class="page-kicker">ERROR 500</div>
 
-            <h1>Lost the thread.</h1>
+            <h1>Something broke on our side.</h1>
 
-            <p>That page doesn&rsquo;t exist &mdash; it may have been moved, renamed, or the
-               link you followed is broken. Nothing is wrong with Hexion.fun itself.</p>
+            <p>The server hit an unexpected error while handling this request.
+               That&rsquo;s ours to fix, not yours &mdash; trying again in a moment usually clears it.</p>
 
             <div class="err-actions">
                 <a class="btn btn-primary" href="/">Back to Hexion.fun</a>
                 <a class="btn btn-secondary" href="/#status">Check system status</a>
             </div>
-
-            <span class="err-path" id="path" hidden></span>
         </section>
 
         <footer>
             <span>Hexion.fun &mdash; your scripts, your space.</span>
-            <span>404 &middot; not found</span>
+            <span>500 &middot; internal server error</span>
         </footer>
     </div>
 
     <script src="/assets/theme.js?v=20261009-2"></script>
-    <script>
-        /* Show which URL missed, so broken links are easy to spot.
-           Hidden by default so the page is complete without JavaScript. */
-        (function () {
-            var el = document.getElementById('path');
-            if (!el) return;
-            el.textContent = document.location.pathname;
-            el.hidden = false;
-        })();
-    </script>
 </body>
 </html>

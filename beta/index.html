@@ -43,6 +43,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
+
+    <!-- Apply a stored colour theme before first paint (no flash). -->
+    <script>
+        try {
+            var t = localStorage.getItem('hexion-theme');
+            if (t) document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="/assets/themes.css?v=20261009-2">
+
     <style>
         /* ===== DESIGN TOKENS ===== */
         :root {
@@ -1371,6 +1381,7 @@
         setInterval(loadEndpoint, 30000);
     </script>
 
+    <script src="/assets/theme.js?v=20261009-2"></script>
 </body>
 
 </html>

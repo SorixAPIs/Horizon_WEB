@@ -35,6 +35,16 @@
     <meta property="twitter:title" content="Hexion.fun">
     <meta property="twitter:description" content="A powerful external for Roblox with fly, aimbot, and more.">
     <meta property="twitter:image" content="/assets/hexion.png">
+
+    <!-- Apply a stored colour theme before first paint (no flash). -->
+    <script>
+        try {
+            var t = localStorage.getItem('hexion-theme');
+            if (t) document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="/assets/themes.css?v=20261009-2">
+
     <style>
         :root {
             --bg: #0c0e13;
@@ -758,5 +768,6 @@
     setInterval(loadEndpoint, 30000);
 </script>
 
+    <script src="/assets/theme.js?v=20261009-2"></script>
 </body>
 </html>
