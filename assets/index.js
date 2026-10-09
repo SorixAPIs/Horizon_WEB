@@ -1,5 +1,5 @@
 /* ============================================================================
-   HORIZON — site source
+   HEXION.FUN — site source
    Rebuilt from the production bundle (Home + Status).
    No framework, no build step: edit, save, refresh.
    ========================================================================== */
@@ -47,15 +47,15 @@ function icon(name, size, cls) {
 /* ---------------------------------------------------------------------------
    Config
    ------------------------------------------------------------------------- */
-const LOGO_REMOTE = 'http://paloma.hidencloud.com:24617/cdn/horizonnn.png';
-const LOGO_LOCAL  = 'assets/horizonnn.png';
-/* Builds live on the Horizon CDN rather than in this repo. Horizon-Internal.zip
+const LOGO_REMOTE = 'http://paloma.hidencloud.com:24617/cdn/Hexion.png';
+const LOGO_LOCAL  = 'assets/hexion.png';
+/* Builds live on the Hexion.fun CDN rather than in this repo. Hexion-Internal.zip
    is not uploaded yet: flip INTERNAL_READY to true once it is, and the Internal
    button switches from "COMING SOON" to a real download on its own. */
 const CDN_BASE = 'http://paloma.hidencloud.com:24617/cdn/';
 const DOWNLOAD_URLS = {
-  external: CDN_BASE + 'Horizon-External.zip',
-  internal: CDN_BASE + 'Horizon-Internal.zip'
+  external: CDN_BASE + 'Hexion-External.zip',
+  internal: CDN_BASE + 'Hexion-Internal.zip'
 };
 const INTERNAL_READY = false;
 
@@ -218,8 +218,8 @@ function applyBuild(key, snapshot) {
 }
 
 function startBuildPollers() {
-  const canPoll = window.HorizonAPI &&
-    typeof window.HorizonAPI.createPoller === 'function';
+  const canPoll = window.HexionAPI &&
+    typeof window.HexionAPI.createPoller === 'function';
 
   if (!canPoll) {
     Object.keys(BUILD_ENDPOINTS).forEach(function (key) {
@@ -235,7 +235,7 @@ function startBuildPollers() {
 
   function ensure(key) {
     if (!buildPollers[key]) {
-      buildPollers[key] = window.HorizonAPI.createPoller(BUILD_ENDPOINTS[key]);
+      buildPollers[key] = window.HexionAPI.createPoller(BUILD_ENDPOINTS[key]);
     }
     return buildPollers[key];
   }
@@ -276,13 +276,13 @@ function nav() {
     '<nav class="nav">' +
       '<button class="brand" data-nav="home">' +
         '<span class="brand-mark">' + logoImg() + '</span>' +
-        '<span>HORIZON</span>' +
+        '<span>HEXION.FUN</span>' +
       '</button>' +
       '<div class="nav-tabs">' +
         tab('home', 'Home') +
         tab('status', 'Status') +
       '</div>' +
-      '<button class="nav-ghost" data-action="open-download">Get Horizon</button>' +
+      '<button class="nav-ghost" data-action="open-download">Get Hexion.fun</button>' +
     '</nav>'
   );
 }
@@ -295,7 +295,7 @@ function homePage() {
       '<div class="grid"></div>' +
       '<div class="hero-copy">' +
         '<div class="eyebrow">' + icon('sparkles', 14) + ' BUILT FOR SPEED</div>' +
-        '<h1>Horizon<span>.</span></h1>' +
+        '<h1>Hexion<span>.fun</span></h1>' +
         '<p class="tagline">Your scripts. Your space.<br>' +
           'A cleaner interface built around the way you play.</p>' +
         '<div class="actions">' +
@@ -312,7 +312,7 @@ function homePage() {
     '</section>' +
 
     '<section class="features">' +
-      '<div class="section-label">HORIZON</div>' +
+      '<div class="section-label">HEXION.FUN</div>' +
       '<div class="feature-grid">' +
         '<article><strong>01</strong><h2>Clean</h2>' +
           '<p>No clutter. Every control has a purpose.</p></article>' +
@@ -332,7 +332,7 @@ function statusPage() {
 
   return (
     '<section class="status-page">' +
-      '<div class="page-kicker">HORIZON STATUS</div>' +
+      '<div class="page-kicker">HEXION.FUN STATUS</div>' +
       '<h1>System status.</h1>' +
       '<p class="page-sub">Executor availability is shown separately for each build. ' +
         'A Roblox update can affect internal availability.</p>' +
@@ -364,7 +364,7 @@ function statusPage() {
       '</div>' +
 
       '<div class="status-note">' + icon('clock', 16) +
-        '<span>If Roblox updates, Horizon can mark the affected internal build as ' +
+        '<span>If Roblox updates, Hexion.fun can mark the affected internal build as ' +
         'unavailable until it is updated.</span></div>' +
     '</section>'
   );
@@ -379,7 +379,7 @@ function downloadModal() {
         '<button class="modal-close" data-action="close-download" aria-label="Close">' +
           icon('x', 18) + '</button>' +
 
-        '<div class="modal-kicker">HORIZON DOWNLOAD</div>' +
+        '<div class="modal-kicker">HEXION.FUN DOWNLOAD</div>' +
         '<h2>Choose your method.</h2>' +
         '<p class="modal-sub">Pick the version you want. Internal is still in development.</p>' +
 
@@ -393,8 +393,8 @@ function downloadModal() {
                   : '<span class="soon">COMING SOON</span>') +
               '</div>' +
               '<p>' + (INTERNAL_READY
-                ? 'Internal Horizon client (.zip &mdash; extract before running).'
-                : 'Built into Horizon. Not available yet.') +
+                ? 'Internal Hexion.fun client (.zip &mdash; extract before running).'
+                : 'Built into Hexion.fun. Not available yet.') +
               '</p>' +
             '</div>' +
             icon('chevronRight', 18) +
@@ -410,7 +410,7 @@ function downloadModal() {
                   ? 'Starting download...'
                   : (state.downloadError
                       ? escapeHtml(state.downloadError)
-                      : 'External Horizon client (.zip &mdash; extract before running).')) +
+                      : 'External Hexion.fun client (.zip &mdash; extract before running).')) +
               '</p>' +
             '</div>' +
             icon('chevronRight', 18) +
@@ -424,7 +424,7 @@ function downloadModal() {
 function footer() {
   return (
     '<footer id="discord">' +
-      '<span>&copy; 2026 Horizon</span>' +
+      '<span>&copy; 2026 Hexion.fun</span>' +
       '<button data-action="to-top">Back to top &uarr;</button>' +
     '</footer>'
   );
@@ -517,7 +517,7 @@ function startDownload(which) {
   fetch(url, { method: 'HEAD', cache: 'no-store' })
     .then(function (res) {
       if (res.status === 404 || res.status === 410) {
-        console.warn('[Horizon] Build file is missing on the host:', url);
+        console.warn('[Hexion.fun] Build file is missing on the host:', url);
         state.downloading = false;
         state.downloadError = 'This build isn’t available right now. Please check back soon.';
         render();
@@ -533,7 +533,7 @@ function startDownload(which) {
 function triggerDownload(which, url) {
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'Horizon-' + (which === 'internal' ? 'Internal' : 'External') + '.zip';
+  a.download = 'Hexion-' + (which === 'internal' ? 'Internal' : 'External') + '.zip';
 
   /* `download` is ignored across origins, so open it in a tab of its own -
      that way a host answering with HTML cannot navigate the site away. */
@@ -588,7 +588,7 @@ document.addEventListener('click', function (e) {
 
     case 'internal':
       if (!INTERNAL_READY) {
-        window.alert('Horizon Internal Executor is coming soon.');
+        window.alert('Hexion.fun Internal Executor is coming soon.');
         break;
       }
       startDownload('internal');

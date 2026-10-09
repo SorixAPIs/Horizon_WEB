@@ -6,11 +6,11 @@
     <meta name="theme-color" content="#030304">
     <meta name="robots" content="noindex,nofollow">
 
-    <title>Horizon — Key</title>
+    <title>Hexion.fun — Key</title>
 
     <!-- Absolute paths: served for every /key/* URL, including three levels deep. -->
-    <link rel="icon" type="image/png" href="/assets/horizonnn.png">
-    <link rel="apple-touch-icon" href="/assets/horizonnn.png">
+    <link rel="icon" type="image/png" href="/assets/hexion.png">
+    <link rel="apple-touch-icon" href="/assets/hexion.png">
 
     <style>
         /* Self-contained: correct even if /assets/index.css never loads. */
@@ -115,8 +115,8 @@
 <body oncontextmenu="return false">
     <nav class="nav">
         <a class="brand" href="/">
-            <span class="brand-mark"><img src="/assets/horizonnn.png" alt="Horizon"></span>
-            <span>HORIZON</span>
+            <span class="brand-mark"><img src="/assets/hexion.png" alt="Hexion.fun"></span>
+            <span>HEXION.FUN</span>
         </a>
     </nav>
 
@@ -132,7 +132,7 @@
             <div class="fail" id="fail"></div>
 
             <div class="keyblock" id="keyblock">
-                <div class="keylabel">YOUR HORIZON KEY</div>
+                <div class="keylabel">YOUR HEXION.FUN KEY</div>
                 <div class="keyrow">
                     <div class="keyval" id="keyval"></div>
                     <button class="copy" id="copy" type="button">Copy</button>
@@ -148,7 +148,7 @@
     (function () {
         'use strict';
 
-        var STORE = 'horizon.keyflow';
+        var STORE = 'hexion.keyflow';
         var WORK  = 'https://work.ink';
         var HC2   = WORK + '/3440/hc2';
         var SITE  = location.origin;
@@ -304,7 +304,7 @@
             el.status.textContent = '';
             el.step.textContent = 'COMPLETE';
             el.title.textContent = 'Key issued';
-            el.lead.innerHTML = 'Both checkpoints verified. This key is bound to <b>Horizon External</b>.';
+            el.lead.innerHTML = 'Both checkpoints verified. This key is bound to <b>Hexion.fun External</b>.';
             el.keyval.textContent = key;
             el.keyblock.className = 'keyblock on';
             el.note.innerHTML = 'Valid for 24 hours. Check it any time at <code>/key/verify/key=' +

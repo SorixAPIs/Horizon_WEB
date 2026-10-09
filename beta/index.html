@@ -5,40 +5,40 @@
 <meta name="robots" content="noindex,nofollow,noarchive">
 <script>
 /* This page is hidden. It bounces normal visitors back to the site root.
-   To open it yourself, add ?key=horizon to the URL once - the choice sticks
+   To open it yourself, add ?key=hexion to the URL once - the choice sticks
    for the current tab. */
 (function () {
     try {
-        if (new URLSearchParams(location.search).get('key') === 'horizon') {
-            sessionStorage.setItem('horizon-allow', '1');
+        if (new URLSearchParams(location.search).get('key') === 'hexion') {
+            sessionStorage.setItem('hexion-allow', '1');
             return;
         }
-        if (sessionStorage.getItem('horizon-allow') === '1') return;
+        if (sessionStorage.getItem('hexion-allow') === '1') return;
     } catch (e) { /* storage blocked: fail closed and bounce */ }
     location.replace('../');
 })();
 </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Horizon Beta</title>
-    <link rel="icon" type="image/png" href="/assets/horizonnn.png">
+    <title>Hexion.fun Beta</title>
+    <link rel="icon" type="image/png" href="/assets/hexion.png">
     <meta name="description"
-        content="Horizon Beta — Preview the next generation of the most powerful external.">
+        content="Hexion.fun Beta — Preview the next generation of the most powerful external.">
     <meta name="theme-color" content="#06d6a0">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Horizon Beta">
+    <meta property="og:title" content="Hexion.fun Beta">
     <meta property="og:description"
-        content="Horizon Beta — Preview the next generation of the most powerful external.">
-    <meta property="og:image" content="/assets/horizonnn.png">
+        content="Hexion.fun Beta — Preview the next generation of the most powerful external.">
+    <meta property="og:image" content="/assets/hexion.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:site_name" content="Horizon">
+    <meta property="og:site_name" content="Hexion.fun">
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="//beta">
-    <meta property="twitter:title" content="Horizon Beta">
+    <meta property="twitter:title" content="Hexion.fun Beta">
     <meta property="twitter:description"
-        content="Horizon Beta — Preview the next generation of the most powerful external.">
-    <meta property="twitter:image" content="/assets/horizonnn.png">
+        content="Hexion.fun Beta — Preview the next generation of the most powerful external.">
+    <meta property="twitter:image" content="/assets/hexion.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
@@ -1063,8 +1063,8 @@
             <div class="nav-inner">
                 <div class="nav-left">
                     <a href="#" class="brand">
-                        <img src="/assets/horizonnn.png" alt="Horizon" onerror="this.style.display='none'">
-                        Horizon
+                        <img src="/assets/hexion.png" alt="Hexion.fun" onerror="this.style.display='none'">
+                        Hexion.fun
                     </a>
                     <span class="beta-pill">Beta</span>
                 </div>
@@ -1118,7 +1118,7 @@
                     <span class="hero-badge-dot" id="main-status-dot"></span>
                     <span id="main-status-text">Initializing...</span>
                 </div>
-                <h1>Horizon</h1>
+                <h1>Hexion.fun</h1>
                 <div class="hero-sub-title">Beta Preview</div>
                 <p>Experience the next generation before anyone else. Cutting-edge features, unmatched performance.</p>
                 <div class="btn-row">
@@ -1166,7 +1166,7 @@
         <!-- Features -->
         <section class="features-section">
             <div class="section-header reveal">
-                <h2>Why Choose Horizon</h2>
+                <h2>Why Choose Hexion.fun</h2>
                 <p>Built for performance. Designed for reliability.</p>
             </div>
             <div class="features-grid">
@@ -1217,7 +1217,7 @@
     <footer>
         <div class="wrap">
             <div class="footer-content">
-                <span>Horizon 2026 V1</span>
+                <span>Hexion.fun 2026 V1</span>
                 <span class="footer-dot"></span>
                 <span>Beta Build</span>
                 <span class="footer-dot"></span>
@@ -1277,7 +1277,7 @@
                 const r = await fetch('../API/endpoint.json');
                 if (!r.ok) throw 0;
                 const d = await r.json();
-                const v = d["Horizon"];
+                const v = d["Hexion"];
                 if (!v) throw 0;
 
                 // Status

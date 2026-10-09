@@ -1,6 +1,6 @@
 {
-  "name": "horizon-web",
+  "name": "hexion-web",
   "private": true,
   "type": "module",
-  "description": "Horizon site. There is no build step - this file exists so Vercel treats middleware.js as an ES module."
+  "description": "Hexion.fun site. There is no build step - this file exists so Vercel treats middleware.js as an ES module."
 }

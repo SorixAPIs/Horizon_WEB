@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------
-   HORIZON — key system endpoints
+   HEXION.FUN — key system endpoints
    ---------------------------------------------------------------------------
    Handled by Vercel Routing Middleware (Node.js runtime), which runs BEFORE
    static routing. That matters: /key/verify/key=<KEY> has to win over the
@@ -25,7 +25,7 @@ const GIST_ID   = '2b8d1771bd120bed768c14ae8b2431a1';
 const LETTERS    = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 const KEY_LENGTH = 19; // same shape as HSIHHIzihekjkhijhgf
 
-/* A Horizon key is good for 24h from the moment it was issued. */
+/* A Hexion.fun key is good for 24h from the moment it was issued. */
 const KEY_TTL_SECONDS = 24 * 60 * 60;
 
 export const config = {
@@ -112,7 +112,7 @@ function gistHeaders() {
   return {
     Authorization: 'Bearer ' + token,
     Accept: 'application/vnd.github+json',
-    'User-Agent': 'horizon-key-system'
+    'User-Agent': 'hexion-key-system'
   };
 }
 
@@ -187,7 +187,7 @@ function renderHtml(result) {
 
   /* A storage failure has no key and no count - never print "undefined". */
   const headline = ok
-    ? 'This key exists and was issued by the Horizon key system.'
+    ? 'This key exists and was issued by the Hexion.fun key system.'
     : (result.error || result.message ||
        'This key is not in the issued list. Keys are only handed out after both checkpoints.');
 
@@ -214,8 +214,8 @@ function renderHtml(result) {
   return '<!DOCTYPE html>\n<html lang="en"><head><meta charset="UTF-8">' +
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
     '<meta name="theme-color" content="#030304"><meta name="robots" content="noindex,nofollow">' +
-    '<title>Horizon — Key check</title>' +
-    '<link rel="icon" type="image/png" href="/assets/horizonnn.png">' +
+    '<title>Hexion.fun — Key check</title>' +
+    '<link rel="icon" type="image/png" href="/assets/hexion.png">' +
     '<style>' +
     '*,*::before,*::after{box-sizing:border-box}' +
     'html,body{margin:0;background:#030304;color:#f7f7f8;font-family:Inter,system-ui,sans-serif}' +
@@ -230,11 +230,11 @@ function renderHtml(result) {
     '.n{font-size:12.5px;color:#85858d;line-height:1.65}' +
     'a{color:#a1a1aa}' +
     '</style></head><body><div class="c ' + (ok ? 'ok' : 'no') + '">' +
-    '<div class="s">HORIZON KEY CHECK</div>' +
+    '<div class="s">HEXION.FUN KEY CHECK</div>' +
     '<h1>' + heading + '</h1>' +
     '<p>' + esc(headline) + '</p>' +
     keyLine +
-    '<p class="n">' + esc(counts) + (counts ? '<br>' : '') + '<a href="/">Back to Horizon</a></p>' +
+    '<p class="n">' + esc(counts) + (counts ? '<br>' : '') + '<a href="/">Back to Hexion.fun</a></p>' +
     '</div></body></html>';
 }
 
@@ -280,7 +280,7 @@ async function handleIssue(request) {
 
     return json(200, { key: key });
   } catch (err) {
-    console.error('[horizon] issue failed:', err && err.message);
+    console.error('[hexion] issue failed:', err && err.message);
 
     /* 401 from work.ink means our own credential is wrong. This fires on the
        first, non-destructive check, so no checkpoint token has been spent. */

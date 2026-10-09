@@ -4,37 +4,37 @@
 <meta name="robots" content="noindex,nofollow,noarchive">
 <script>
 /* This page is hidden. It bounces normal visitors back to the site root.
-   To open it yourself, add ?key=horizon to the URL once - the choice sticks
+   To open it yourself, add ?key=hexion to the URL once - the choice sticks
    for the current tab. */
 (function () {
     try {
-        if (new URLSearchParams(location.search).get('key') === 'horizon') {
-            sessionStorage.setItem('horizon-allow', '1');
+        if (new URLSearchParams(location.search).get('key') === 'hexion') {
+            sessionStorage.setItem('hexion-allow', '1');
             return;
         }
-        if (sessionStorage.getItem('horizon-allow') === '1') return;
+        if (sessionStorage.getItem('hexion-allow') === '1') return;
     } catch (e) { /* storage blocked: fail closed and bounce */ }
     location.replace('../');
 })();
 </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Horizon</title>
-    <link rel="icon" type="image/png" href="/assets/horizonnn.png">
+    <title>Hexion.fun</title>
+    <link rel="icon" type="image/png" href="/assets/hexion.png">
     <meta name="description" content="A powerful external for Roblox with fly, aimbot, and more.">
     <meta name="theme-color" content="#4e9af5">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Horizon">
+    <meta property="og:title" content="Hexion.fun">
     <meta property="og:description" content="A powerful external for Roblox with fly, aimbot, and more.">
-    <meta property="og:image" content="/assets/horizonnn.png">
+    <meta property="og:image" content="/assets/hexion.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:site_name" content="Horizon">
+    <meta property="og:site_name" content="Hexion.fun">
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="//">
-    <meta property="twitter:title" content="Horizon">
+    <meta property="twitter:title" content="Hexion.fun">
     <meta property="twitter:description" content="A powerful external for Roblox with fly, aimbot, and more.">
-    <meta property="twitter:image" content="/assets/horizonnn.png">
+    <meta property="twitter:image" content="/assets/hexion.png">
     <style>
         :root {
             --bg: #0c0e13;
@@ -528,8 +528,8 @@
 <nav>
     <div class="wrap">
         <a href="#" class="brand">
-            <img src="/assets/horizonnn.png" alt="Horizon" onerror="this.style.display='none'">
-            Horizon
+            <img src="/assets/hexion.png" alt="Hexion.fun" onerror="this.style.display='none'">
+            Hexion.fun
         </a>
         <div class="nav-links">
             <a href="../docs" class="nav-link">API Docs</a>
@@ -557,7 +557,7 @@
 
 <div class="wrap">
     <section class="hero">
-        <h1>Horizon</h1>
+        <h1>Hexion.fun</h1>
         <p>A powerful external for Roblox with many Features.</p>
         <div class="badge">
             <span class="badge-dot" id="main-status-dot"></span>
@@ -607,7 +607,7 @@
 </div>
 
 <footer>
-    <div class="wrap">Horizon 2026 V1 &middot; All rights reserved</div>
+    <div class="wrap">Hexion.fun 2026 V1 &middot; All rights reserved</div>
 </footer>
 
 <script>
@@ -650,7 +650,7 @@
             const r = await fetch('/API/endpoint.json');
             if (!r.ok) throw 0;
             const d = await r.json();
-            const v = d["Horizon"];
+            const v = d["Hexion"];
             if (!v) throw 0;
 
             document.getElementById('main-status-text').textContent = v.Status;

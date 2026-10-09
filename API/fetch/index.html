@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex,nofollow">
-    <title>Horizon — /API/fetch</title>
-    <link rel="icon" type="image/png" href="/assets/horizonnn.png">
+    <title>Hexion.fun — /API/fetch</title>
+    <link rel="icon" type="image/png" href="/assets/hexion.png">
     <style>
         /* Mimic a raw application/json response: plain monospace text, nothing else. */
         html, body {
@@ -35,17 +35,17 @@
 
             var out = document.getElementById('out');
 
-            if (!window.HorizonAPI) {
+            if (!window.HexionAPI) {
                 out.textContent = JSON.stringify({ error: 'API/fetch.js failed to load' });
                 return;
             }
 
-            var ENDPOINTS = window.HorizonAPI.ENDPOINTS;
+            var ENDPOINTS = window.HexionAPI.ENDPOINTS;
             var names = Object.keys(ENDPOINTS);
             var pollers = {};
 
             names.forEach(function (name) {
-                pollers[name] = window.HorizonAPI.createPoller(ENDPOINTS[name]);
+                pollers[name] = window.HexionAPI.createPoller(ENDPOINTS[name]);
             });
 
             /* Snapshot of one endpoint: the live payload when we have it, a

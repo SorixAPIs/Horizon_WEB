@@ -4,24 +4,24 @@
 <meta name="robots" content="noindex,nofollow,noarchive">
 <script>
 /* This page is hidden. It bounces normal visitors back to the site root.
-   To open it yourself, add ?key=horizon to the URL once - the choice sticks
+   To open it yourself, add ?key=hexion to the URL once - the choice sticks
    for the current tab. */
 (function () {
     try {
-        if (new URLSearchParams(location.search).get('key') === 'horizon') {
-            sessionStorage.setItem('horizon-allow', '1');
+        if (new URLSearchParams(location.search).get('key') === 'hexion') {
+            sessionStorage.setItem('hexion-allow', '1');
             return;
         }
-        if (sessionStorage.getItem('horizon-allow') === '1') return;
+        if (sessionStorage.getItem('hexion-allow') === '1') return;
     } catch (e) { /* storage blocked: fail closed and bounce */ }
     location.replace('../');
 })();
 </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Horizon - Documentation</title>
-    <link rel="icon" type="image/png" href="/assets/horizonnn.png">
-    <meta name="description" content="Horizon API Documentation">
+    <title>Hexion.fun - Documentation</title>
+    <link rel="icon" type="image/png" href="/assets/hexion.png">
+    <meta name="description" content="Hexion.fun API Documentation">
     <meta name="theme-color" content="#4e9af5">
     <style>
         :root {
@@ -344,8 +344,8 @@
 <nav>
     <div class="wrap">
         <a href="index.html" class="brand">
-            <img src="/assets/horizonnn.png" alt="Horizon" onerror="this.style.display='none'">
-            Horizon
+            <img src="/assets/hexion.png" alt="Hexion.fun" onerror="this.style.display='none'">
+            Hexion.fun
         </a>
         <div class="nav-links">
             <a href="../home" class="nav-link">Home</a>
@@ -359,7 +359,7 @@
     <div class="docs-content">
         <div class="docs-header">
             <h1>API Documentation</h1>
-            <p>The public Horizon API is unauthenticated and rate-limited per IP. All responses are JSON. The base URL is <code style="background: var(--surface); padding: 2px 6px; border-radius: 4px; color: var(--accent);">/</code></p>
+            <p>The public Hexion.fun API is unauthenticated and rate-limited per IP. All responses are JSON. The base URL is <code style="background: var(--surface); padding: 2px 6px; border-radius: 4px; color: var(--accent);">/</code></p>
         </div>
 
         <div class="docs-section">
@@ -371,7 +371,7 @@
 
         <div class="docs-section" id="endpoint">
             <h2>GET /API/endpoint.json</h2>
-            <p>Returns the current status, version, and configuration of Horizon.</p>
+            <p>Returns the current status, version, and configuration of Hexion.fun.</p>
 
             <div class="endpoint-box">
                 <span class="endpoint-method">GET</span>
@@ -393,7 +393,7 @@ console.log(data);</code></pre>
             <div class="response-example">
                 <button class="copy-btn" type="button">Copy</button>
                 <pre><code>{
-  "Horizon": {
+  "Hexion": {
     "Status": "In Dev",
     "Version": "0.0.0",
     "type": "external",
@@ -551,7 +551,7 @@ console.log(data);</code></pre>
 </div>
 
 <footer>
-    <div class="wrap">Horizon 2026 V1 &middot; All rights reserved</div>
+    <div class="wrap">Hexion.fun 2026 V1 &middot; All rights reserved</div>
 </footer>
 
 <script>

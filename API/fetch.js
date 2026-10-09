@@ -1,7 +1,7 @@
 /* ============================================================================
-   HORIZON — API bridge   ( /API/fetch )
+   HEXION.FUN — API bridge   ( /API/fetch )
    ---------------------------------------------------------------------------
-   Polls the Horizon endpoints every 10 seconds and exposes the result for the
+   Polls the Hexion.fun endpoints every 10 seconds and exposes the result for the
    page at /API/fetch to render. The Status page reuses the same machinery to
    poll the very same endpoints for its build cards.
 
@@ -68,7 +68,7 @@
      the upstream is http:// only. Only works when the host proxies it - see
      `_redirects` and the README. Unconfigured it just 404s and loses the race,
      which is why it costs nothing to keep it first. */
-  var PROXY_PREFIX = '/horizon-upstream/';
+  var PROXY_PREFIX = '/hexion-upstream/';
 
   /* http://host:port/path  ->  /path */
   function stripOrigin(url) {
@@ -240,7 +240,7 @@
     if (err instanceof SyntaxError) return 'Response was not valid JSON';
     if (err.message === 'no transport available' ||
         err.message === 'all transports failed') {
-      return 'Could not reach the Horizon API from this page';
+      return 'Could not reach the Hexion.fun API from this page';
     }
     return err.message || String(err);
   }
@@ -393,7 +393,7 @@
     get: function () { return activeGate ? activeGate.id : null; }
   });
 
-  global.HorizonAPI = api;
+  global.HexionAPI = api;
 
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = api;   // usable from Node too, if you ever add a server

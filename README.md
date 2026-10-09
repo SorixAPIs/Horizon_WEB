@@ -1,6 +1,6 @@
-# Horizon
+# Hexion.fun
 
-Source for **[gethorizon.kdns.fr](https://gethorizon.kdns.fr/)** — the public site for Horizon, a keyless Roblox executor.
+Source for **[gethexion.kdns.fr](https://gethexion.kdns.fr/)** — the public site for Hexion.fun, a keyless Roblox executor.
 
 Static site. No build step and no framework — open `index.html` or point any
 static host at the repo root. One exception: `middleware.js` is Vercel Routing
@@ -17,7 +17,7 @@ Middleware, and only powers the two key-system endpoints (see below).
 ├── assets/
 │   ├── index.css       Stylesheet
 │   ├── index.js        All site logic (nav, Status page, download modal, polling)
-│   └── horizonnn.png   Horizon logo (local fallback)
+│   └── hexion.png      Hexion.fun logo (local fallback)
 ├── API/
 │   ├── fetch.js        Endpoint poller / transport chain shared by the whole site
 │   ├── fetch.html      /API/fetch  (extensionless-path twin)
@@ -36,7 +36,7 @@ Middleware, and only powers the two key-system endpoints (see below).
 | `/API/fetch` | Live JSON for both builds — polled every 10 s |
 | `/get_key/v=1` | Starts the two-checkpoint key flow |
 | `/404` | Served automatically for any unknown URL |
-| `/beta`, `/docs`, `/tos`, `/home` | Hidden — redirect away unless `?key=horizon` is present |
+| `/beta`, `/docs`, `/tos`, `/home` | Hidden — redirect away unless `?key=hexion` is present |
 
 Hidden pages are only *lightly* hidden: on a static host the HTML is still downloadable if someone guesses the URL.
 
@@ -70,7 +70,7 @@ the first that returns parseable JSON:
 | transport | when it applies |
 | --- | --- |
 | `direct` | `http://` pages only — skipped on `https://`, where it is guaranteed to be blocked |
-| `site-proxy` | `/horizon-upstream/*`, a same-origin passthrough (needs the host's rewrite config below) |
+| `site-proxy` | `/hexion-upstream/*`, a same-origin passthrough (needs the host's rewrite config below) |
 | `allorigins`, `codetabs`, `corsproxy`, `jina` | last resort — public CORS relays, rate-limited and brittle |
 
 The clean transport gets a solo attempt first, so a working setup logs **zero**
@@ -154,7 +154,7 @@ Two clocks, deliberately separate:
 
 | Clock | Where it lives | What it does |
 | --- | --- | --- |
-| Horizon key | the gist + `KEY_TTL_SECONDS` | how long the key the visitor keeps stays usable |
+| Hexion.fun key | the gist + `KEY_TTL_SECONDS` | how long the key the visitor keeps stays usable |
 | work.ink token | **Settings → Key Expiration Time (minutes)** | how long a checkpoint proof survives before `middleware.js` rejects it |
 
 The second one matters more than it looks: `/api/key/issue` re-validates
@@ -167,7 +167,7 @@ does not make them reusable.
 ### Checking a key from an app
 
 ```
-GET https://gethorizon.kdns.fr/key/verify/key=<KEY>/raw
+GET https://gethexion.kdns.fr/key/verify/key=<KEY>/raw
 ```
 
 `/raw` answers JSON for **every** outcome — unknown key, bad path, storage
@@ -258,15 +258,15 @@ Both pollers stop while you are off the Status page.
 Everything you are likely to change lives at the top of `assets/index.js`:
 
 ```js
-const LOGO_REMOTE = 'http://paloma.hidencloud.com:24617/cdn/horizonnn.png';
-const LOGO_LOCAL  = 'assets/horizonnn.png';
+const LOGO_REMOTE = 'http://paloma.hidencloud.com:24617/cdn/Hexion.png';
+const LOGO_LOCAL  = 'assets/hexion.png';
 const DISCORD_INVITE = 'https://discord.gg/beM4pRtBdG';
 const API_ORIGIN = 'http://paloma.hidencloud.com:24617';
 
 /* Builds are served from the CDN, not from this repo. */
 const CDN_BASE = 'http://paloma.hidencloud.com:24617/cdn/';
 const DOWNLOAD_URLS = { external: '...External.zip', internal: '...Internal.zip' };
-const INTERNAL_READY = false;   // flip once Horizon-Internal.zip is uploaded
+const INTERNAL_READY = false;   // flip once Hexion-Internal.zip is uploaded
 ```
 
 `API/fetch.js` holds the endpoints and the transport list.
@@ -287,11 +287,11 @@ Then open `http://localhost:3000` (or `:8000`).
 
 Any static host works. For the custom 404, the host must look for `404.html` at the site root (Netlify, GitHub Pages, Vercel and Cloudflare Pages all do).
 
-The live site is **[gethorizon.kdns.fr](https://gethorizon.kdns.fr/)** (Vercel). Two config files are shipped so the `/horizon-upstream/` passthrough works on either major host — **both are required for the site to reach the API from `https://`**, since mixed content blocks a direct call:
+The live site is **[gethexion.kdns.fr](https://gethexion.kdns.fr/)** (Vercel). Two config files are shipped so the `/hexion-upstream/` passthrough works on either major host — **both are required for the site to reach the API from `https://`**, since mixed content blocks a direct call:
 
 | host | file | effect |
 | --- | --- | --- |
-| Vercel | `vercel.json` | rewrites `/horizon-upstream/:path*` → `http://paloma.hidencloud.com:24617/:path*` |
+| Vercel | `vercel.json` | rewrites `/hexion-upstream/:path*` → `http://paloma.hidencloud.com:24617/:path*` |
 | Netlify | `_redirects` | same rewrite, Netlify syntax |
 
 On a host with neither (GitHub Pages, Cloudflare Pages), there is no same-origin passthrough and the Status page must fall back to a public relay. The alternative everywhere is to serve the API over `https://`, which would make the `direct` transport usable and both config files redundant.

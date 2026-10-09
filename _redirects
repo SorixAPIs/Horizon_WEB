@@ -1,4 +1,4 @@
-# Proxy the Horizon API through this site.
+# Proxy the Hexion.fun API through this site.
 #
 # The browser then fetches from its own origin, which means:
 #   - no CORS header needed on the upstream
@@ -8,7 +8,7 @@
 # If you deploy somewhere that does not understand this file (GitHub Pages,
 # Cloudflare Pages), the site simply falls back to its relay chain - see README.
 
-/horizon-upstream/*  http://paloma.hidencloud.com:24617/:splat  200
+/hexion-upstream/*  http://paloma.hidencloud.com:24617/:splat  200
 
 # Key system: /get_key/v=1, /key/auth=<auth>/c1, /key/auth=<auth>/c2 and
 # /key/success=<token> are all served by the two pages below, which work out

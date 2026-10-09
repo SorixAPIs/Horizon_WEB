@@ -21,7 +21,7 @@ package-lock.json
 .env
 .env.*
 
-# Legacy Venus logo. Superseded by assets/horizonnn.png (remote original:
-# http://paloma.hidencloud.com:24617/cdn/horizonnn.png). Kept on disk,
+# Legacy Venus logo. Superseded by assets/hexion.png (remote original:
+# http://paloma.hidencloud.com:24617/cdn/Hexion.png). Kept on disk,
 # deliberately never published.
 Logo.png
