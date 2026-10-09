@@ -291,17 +291,18 @@ Then open `http://localhost:3000` (or `:8000`).
 
 Any static host works. For the custom 404, the host must look for `404.html` at the site root (Netlify, GitHub Pages, Vercel and Cloudflare Pages all do).
 
-The live site is **[gethexion.kdns.fr](https://gethexion.kdns.fr/)** (Vercel). Two config files are shipped so both passthroughs work on either major host — **the upstream one is required for the site to reach the API from `https://`**, since mixed content blocks a direct call:
+The live site is **[gethexion.kdns.fr](https://gethexion.kdns.fr/)** (Vercel). Two config files are shipped so every passthrough below works on either major host — **the upstream one is required for the site to reach the API from `https://`**, since mixed content blocks a direct call:
 
 | path | why |
 | --- | --- |
 | `/hexion-upstream/:path*` | Status page → API (`paloma.hidencloud.com:24617`) |
 | `/cdn/:path*` | **every file on the CDN**, e.g. `/cdn/Hexion-External.zip`. Same-origin, so the Download button gets a real filename, no stray tab, and a working HEAD pre-check. Upload a file to the CDN and it is here with no code change. |
+| `/API/fetch/External` · `/API/fetch/Internal` | The raw build JSON on this origin — `GET` either one for the document the Status page polls, with no UI around it. Both are exact paths on purpose: `/API/fetch` and `/API/fetch/` are the rendered page and must keep coming off the filesystem, so nothing may match an empty tail. A new build endpoint means one line in each config file. |
 
 | host | file | effect |
 | --- | --- | --- |
-| Vercel | `vercel.json` | both rewrites above |
-| Netlify | `_redirects` | same two rewrites, Netlify syntax |
+| Vercel | `vercel.json` | every rewrite above |
+| Netlify | `_redirects` | same rewrites, Netlify syntax |
 
 On a host with neither (GitHub Pages, Cloudflare Pages), there is no same-origin passthrough and the Status page must fall back to a public relay. The alternative everywhere is to serve the API over `https://`, which would make the `direct` transport usable and both config files redundant.
 

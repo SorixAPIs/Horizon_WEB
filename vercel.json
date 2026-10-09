@@ -13,6 +13,14 @@
       "destination": "http://paloma.hidencloud.com:24617/cdn/:path*"
     },
     {
+      "source": "/API/fetch/External",
+      "destination": "http://paloma.hidencloud.com:24617/api/fetch/External"
+    },
+    {
+      "source": "/API/fetch/Internal",
+      "destination": "http://paloma.hidencloud.com:24617/api/fetch/Internal"
+    },
+    {
       "source": "/hexion-upstream/:path*",
       "destination": "http://paloma.hidencloud.com:24617/:path*"
     }

@@ -22,6 +22,14 @@
 
 /cdn/*  http://paloma.hidencloud.com:24617/cdn/*  200
 
+# Live build JSON on this origin, one endpoint per build. These are exact paths
+# on purpose: /API/fetch and /API/fetch/ are the rendered page and must keep
+# being served from the filesystem, so nothing here may match an empty tail.
+# Add a line here and one in vercel.json when a new build endpoint appears.
+
+/API/fetch/External  http://paloma.hidencloud.com:24617/api/fetch/External  200
+/API/fetch/Internal  http://paloma.hidencloud.com:24617/api/fetch/Internal  200
+
 # Key system: /get_key/v=1, /key/auth=<auth>/c1, /key/auth=<auth>/c2 and
 # /key/success=<token> are all served by the two pages below, which work out
 # which step they are from location.pathname.
